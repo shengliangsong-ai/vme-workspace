@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { AppState, Issue, Skill, Settings, Job, WorkflowStep, DEFAULT_BUG_STEPS } from '../types';
+import { AppState, Issue, Skill, Settings, Job, Standup, BlogPost, SessionReport, WorkflowStep, DEFAULT_BUG_STEPS } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { GitHubService } from '../lib/github';
 
@@ -20,6 +20,17 @@ interface AppContextType extends AppState {
   cancelJob: (id: string) => void;
   reorderJob: (id: string, newIndex: number) => void;
   deleteJob: (id: string) => void;
+  
+  addStandup: (standup: Omit<Standup, 'id' | 'createdAt'>) => void;
+  updateStandup: (id: string, updates: Partial<Standup>) => void;
+  deleteStandup: (id: string) => void;
+  
+  addBlogPost: (post: Omit<BlogPost, 'id' | 'createdAt'>) => void;
+  updateBlogPost: (id: string, updates: Partial<BlogPost>) => void;
+  deleteBlogPost: (id: string) => void;
+  
+  addSessionReport: (report: Omit<SessionReport, 'id' | 'createdAt'>) => void;
+  
   isSyncing: boolean;
 }
 
@@ -35,6 +46,9 @@ const initialState: AppState = {
   settings: defaultSettings,
   activeIssueId: null,
   jobs: [],
+  standups: [],
+  blogPosts: [],
+  sessionReports: [],
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -44,7 +58,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem('vme-state');
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { ...initialState, ...parsed, jobs: parsed.jobs || [] };
+      return { 
+        ...initialState, 
+        ...parsed, 
+        jobs: parsed.jobs || [],
+        standups: parsed.standups || [],
+        blogPosts: parsed.blogPosts || [],
+        sessionReports: parsed.sessionReports || []
+      };
     }
     return initialState;
   });
@@ -229,6 +250,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const addStandup = (standup: Omit<Standup, 'id' | 'createdAt'>) => {
+    const newStandup: Standup = { ...standup, id: uuidv4(), createdAt: Date.now() };
+    setState(s => ({ ...s, standups: [newStandup, ...s.standups] }));
+  };
+
+  const updateStandup = (id: string, updates: Partial<Standup>) => {
+    setState(s => ({ ...s, standups: s.standups.map(st => st.id === id ? { ...st, ...updates } : st) }));
+  };
+
+  const deleteStandup = (id: string) => {
+    setState(s => ({ ...s, standups: s.standups.filter(st => st.id !== id) }));
+  };
+
+  const addBlogPost = (post: Omit<BlogPost, 'id' | 'createdAt'>) => {
+    const newPost: BlogPost = { ...post, id: uuidv4(), createdAt: Date.now() };
+    setState(s => ({ ...s, blogPosts: [newPost, ...s.blogPosts] }));
+  };
+
+  const updateBlogPost = (id: string, updates: Partial<BlogPost>) => {
+    setState(s => ({ ...s, blogPosts: s.blogPosts.map(bp => bp.id === id ? { ...bp, ...updates } : bp) }));
+  };
+
+  const deleteBlogPost = (id: string) => {
+    setState(s => ({ ...s, blogPosts: s.blogPosts.filter(bp => bp.id !== id) }));
+  };
+
+  const addSessionReport = (report: Omit<SessionReport, 'id' | 'createdAt'>) => {
+    const newReport: SessionReport = { ...report, id: uuidv4(), createdAt: Date.now() };
+    setState(s => ({ ...s, sessionReports: [newReport, ...s.sessionReports] }));
+  };
+
   const syncToGitHub = async () => {
     if (!state.settings.githubToken || !state.settings.githubRepo) return;
     setIsSyncing(true);
@@ -237,7 +289,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await github.syncState({
         issues: state.issues,
         skills: state.skills,
-        jobs: state.jobs
+        jobs: state.jobs,
+        standups: state.standups,
+        blogPosts: state.blogPosts,
+        sessionReports: state.sessionReports
       });
       alert('Successfully synced to GitHub!');
     } catch (e: any) {
@@ -259,7 +314,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...s, 
           issues: remoteState.issues || [], 
           skills: remoteState.skills || [],
-          jobs: remoteState.jobs || []
+          jobs: remoteState.jobs || [],
+          standups: remoteState.standups || [],
+          blogPosts: remoteState.blogPosts || [],
+          sessionReports: remoteState.sessionReports || []
         }));
         alert('Successfully pulled from GitHub!');
       } else {
@@ -292,6 +350,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       cancelJob,
       reorderJob,
       deleteJob,
+      addStandup,
+      updateStandup,
+      deleteStandup,
+      addBlogPost,
+      updateBlogPost,
+      deleteBlogPost,
+      addSessionReport,
       isSyncing
     }}>
       {children}

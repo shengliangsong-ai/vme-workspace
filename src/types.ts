@@ -18,6 +18,40 @@ export interface Job {
   log: string;
 }
 
+export interface Standup {
+  id: string;
+  date: string;
+  today: string;
+  tomorrow: string;
+  blockers: string;
+  createdAt: number;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  labels: string[];
+  createdAt: number;
+}
+
+export interface SessionReport {
+  id: string;
+  issueId: string;
+  initialGoal: string;
+  completionSummary: string;
+  readyForProdReason: string;
+  codeStandardPassed: boolean;
+  testsPassed: boolean;
+  approved: boolean;
+  codeReviewScore: number;
+  riskScore: number;
+  valueScore: number;
+  tokensUsed: number;
+  cost: number;
+  createdAt: number;
+}
+
 export interface Issue {
   id: string;
   title: string;
@@ -53,6 +87,9 @@ export interface AppState {
   settings: Settings;
   activeIssueId: string | null;
   jobs: Job[];
+  standups: Standup[];
+  blogPosts: BlogPost[];
+  sessionReports: SessionReport[];
 }
 
 export const DEFAULT_BUG_STEPS = [

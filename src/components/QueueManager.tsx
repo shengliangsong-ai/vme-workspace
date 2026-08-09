@@ -147,18 +147,18 @@ export function QueueManager() {
         </div>
 
         {/* Right Column: Log Viewer */}
-        <div className="bg-[#1e1e1e] border border-[#eeeeee] rounded-xl shadow-sm flex flex-col overflow-hidden text-[#d4d4d4]">
-          <div className="p-4 border-b border-[#333333] flex justify-between items-center bg-[#252526]">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-[#888888]">Run Logs</h3>
+        <div className="bg-[#f9f9f9] border border-[#eeeeee] rounded-xl shadow-sm flex flex-col overflow-hidden text-[#1a1a1a]">
+          <div className="p-4 border-b border-[#eeeeee] flex justify-between items-center bg-white">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-[#999999]">Run Logs</h3>
             {selectedJob && (
-              <span className="text-xs font-mono">{selectedJob.status}</span>
+              <span className="text-xs font-mono text-[#666666]">{selectedJob.status}</span>
             )}
           </div>
           <div className="flex-1 overflow-y-auto p-4 font-mono text-xs whitespace-pre-wrap">
             {selectedJob ? (
               selectedJob.log || 'No output yet...'
             ) : (
-              <div className="h-full flex items-center justify-center text-[#555555]">
+              <div className="h-full flex items-center justify-center text-[#999999]">
                 Select a job to view logs
               </div>
             )}

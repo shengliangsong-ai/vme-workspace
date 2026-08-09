@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { cn, estimateTokens, formatTokenCount } from '../lib/utils';
-import { CheckCircle2, Circle, ChevronDown, ChevronRight, Save } from 'lucide-react';
+import { CheckCircle2, Circle, ChevronDown, ChevronRight, Save, FileText } from 'lucide-react';
+import { SessionReportModal } from './SessionReportModal';
 
 export function Workspace() {
   const { issues, activeIssueId, updateStepContent, toggleStepCompletion, updateIssue } = useAppContext();
   const [expandedStep, setExpandedStep] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const activeIssue = issues.find(i => i.id === activeIssueId);
 
@@ -106,10 +108,20 @@ export function Workspace() {
         })}
         
         <div className="mt-8 bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Final Context Summary</h3>
-          <p className="text-sm text-[#666666] mb-4">
-            Distill the essential information here. When this issue is closed, this summary will be saved to your VME for future reference.
-          </p>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Final Context Summary</h3>
+              <p className="text-sm text-[#666666]">
+                Distill the essential information here. When this issue is closed, this summary will be saved to your VME for future reference.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm whitespace-nowrap"
+            >
+              <FileText size={16} /> Generate Report
+            </button>
+          </div>
           <textarea
             value={activeIssue.contextSummary}
             onChange={(e) => updateIssue(activeIssue.id, { contextSummary: e.target.value })}
@@ -118,6 +130,10 @@ export function Workspace() {
           />
         </div>
       </div>
+      
+      {showReportModal && (
+        <SessionReportModal issue={activeIssue} onClose={() => setShowReportModal(false)} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo, Calendar, BookOpen } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 interface SidebarProps {
@@ -16,6 +16,8 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
     { id: 'queue', label: 'Job Queue', icon: ListTodo },
     { id: 'workspace', label: 'Active Workspace', icon: CheckSquare },
     { id: 'skills', label: 'Skills & Context', icon: BrainCircuit },
+    { id: 'standups', label: 'Daily Standups', icon: Calendar },
+    { id: 'blog', label: 'Blog / Lessons', icon: BookOpen },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
