@@ -22,8 +22,9 @@ We are primarily targeting **The Collaborative Partner** track, with strong unde
 
 ### 5. Key Features
 *   **Cost-Efficient Scaling:** Deploys via **Cloud Run** with a single URL, automatically scaling to zero when not actively running background workflows.
-*   **Autonomous Job Queue:** A background runner built on the ADK that executes agentic workflows and tool calls.
-*   **Digital Twin Knowledge Base:** Integrated issue tracking, daily standups, and session reports stored in **Firestore** that act as the agent's long-term memory.
+*   **Long-Running Persistent Workflows:** A background runner built on the ADK that executes long-running agentic workflows. It supports crash recovery, idempotency, and human-in-the-loop approval pauses before executing sensitive actions.
+*   **Digital Twin Memory Bank:** Integrated issue tracking, daily standups, and session reports stored in **Firestore**. Utilizes **Vector Search** and Managed Cloud Memory to semantically recall relevant past architectural decisions.
+*   **Self-Evolving Intelligence:** The agent actively analyzes its past execution logs (successes/failures) to autonomously self-improve, updating its own instructions and "Skills" over time.
 *   **Open-Source Intelligence:** Powered by **Genkit** to create structured, AI-powered app features and maintain high code quality.
 
 ### 6. Tech Stack
@@ -31,11 +32,11 @@ We are primarily targeting **The Collaborative Partner** track, with strong unde
 *   **AI Models:** **Gemini API & Google AI Studio** (for core reasoning, multimodal features, and quickstarts)
 *   **Agent Orchestration:** **Agent Development Kit (ADK)** (Python) for building and deploying the agents, alongside the **Antigravity SDK** for a pre-packaged runtime tightly integrated with Gemini.
 *   **AI Framework:** **Genkit** (open-source framework for building AI-powered apps).
-*   **Database:** **Firestore** (simple NoSQL datastore for agent state/memory).
+*   **Database:** **Firestore** (simple NoSQL datastore for agent state/memory and vector search).
 *   **Deployment:** **Cloud Run** (deploy the agent with a URL; scales to zero when idle).
 
 ### 7. Future Roadmap
-*   **Multi-Agent Orchestration:** Expand the qsub system to delegate tasks to specialized sub-agents (e.g., a "QA Agent" and a "DevOps Agent").
+*   **Multi-Agent Orchestration Teams:** Transition from a single agent to a multi-agent system utilizing ADK 2 orchestration patterns (e.g., Planner, Executor, and QA Reviewer sub-agents) to tackle complex enterprise epics.
 *   **Real-time Output Streaming:** Stream terminal output from agent-executed shell commands directly to the React frontend.
 
 ### 8. Tags
