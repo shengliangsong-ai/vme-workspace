@@ -2,8 +2,8 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import fs from "fs";
-import { initializeApp, applicationDefault } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { genkit, z } from "genkit";
 import { googleAI, gemini15Flash } from "@genkit-ai/googleai";
 
@@ -19,14 +19,11 @@ async function startServer() {
 
   app.use(express.json({ limit: "50mb" }));
 
-  // Initialize Firebase Admin
-  let db: FirebaseFirestore.Firestore;
+  // Initialize Firebase Client SDK
+  let db: any;
   if (fs.existsSync('./firebase-applet-config.json')) {
     const config = JSON.parse(fs.readFileSync('./firebase-applet-config.json', 'utf8'));
-    const firebaseApp = initializeApp({
-      credential: applicationDefault(),
-      projectId: config.projectId
-    });
+    const firebaseApp = initializeApp(config);
     db = getFirestore(firebaseApp, config.firestoreDatabaseId || '(default)');
   } else {
     throw new Error("Missing firebase-applet-config.json");
@@ -35,9 +32,9 @@ async function startServer() {
   // API Routes
   app.get("/api/state", async (req, res) => {
     try {
-      const docRef = db.collection('workspaces').doc('default');
-      const docSnap = await docRef.get();
-      if (!docSnap.exists) {
+      const docRef = doc(db, 'workspaces', 'default');
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
         const initialState = {
           issues: [],
           skills: [],
@@ -47,7 +44,7 @@ async function startServer() {
           sessionReports: [],
           settings: {}
         };
-        await docRef.set(initialState);
+        await setDoc(docRef, initialState);
         res.json(initialState);
       } else {
         res.json(docSnap.data());
@@ -60,8 +57,8 @@ async function startServer() {
 
   app.post("/api/state", async (req, res) => {
     try {
-      const docRef = db.collection('workspaces').doc('default');
-      await docRef.set(req.body);
+      const docRef = doc(db, 'workspaces', 'default');
+      await setDoc(docRef, req.body);
       res.json({ success: true });
     } catch (err) {
       console.error("Failed to save state", err);

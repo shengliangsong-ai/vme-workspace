@@ -7,3 +7,4 @@ coverage/
 .env*
 !.env.example
 vme.db
+firebase-applet-config.json
