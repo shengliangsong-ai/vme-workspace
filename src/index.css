@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {

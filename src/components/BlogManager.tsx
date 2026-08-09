@@ -1,13 +1,95 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { BookOpen, Plus, Trash2, Save, Search, Tag } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Save, Search, Tag, Edit3, Code, LayoutTemplate } from 'lucide-react';
 import { BlogPost } from '../types';
+import Markdown from 'react-markdown';
+
+const ARCHITECTURE_DOC = `# Virtual Me (VME) Architecture & Implementation Details
+
+The Virtual Me (VME) application is a client-side Single Page Application (SPA) built using React, Vite, and Tailwind CSS. It serves as a personal developer workspace to manage issues, skills, daily standups, queued jobs (qsub), and session reports.
+
+## Core Architecture
+
+### 1. State Management
+- **Context API**: The entire application state is managed via React Context (AppContext.tsx).
+- **Local Persistence**: State is serialized and saved to the browser's localStorage (vme-state). This allows the app to maintain state across page reloads without a traditional backend database.
+- **GitHub Sync**: The application can sync its state to a GitHub repository by authenticating via a Personal Access Token. This acts as a remote backup and version control for the workspace data.
+
+### 2. Frontend Routing & Layout
+- A simple tab-based routing system is implemented in App.tsx, avoiding the need for heavy routing libraries.
+- The layout features a persistent left sidebar (Sidebar.tsx) for navigation, and a main content area that renders the selected manager/dashboard component.
+
+### 3. Styling
+- **Tailwind CSS**: Used extensively for utility-first styling. 
+- **Lucide React**: Provides consistent vector icons across the UI.
+
+## Modules & Features
+
+- **Dashboard**: Displays a high-level overview of active issues, skills, and pending jobs.
+- **Workspace (Issues)**: Manages tasks/issues, workflow steps, and context summaries. Allows generating a "Session Report" when a task is completed.
+- **Job Queue (qsub)**: Simulates a job submission system where tasks can be queued, reordered, cancelled, and run with a specific timeout.
+- **Skills & Context**: A repository of acquired skills and reference materials.
+- **Daily Standups**: Tracks daily achievements, tomorrow's plans, and current blockers.
+- **Blog / Lessons Learned**: A space to document architectural decisions, insights, and session reports.
+
+## Mocked Components & "TODO" Items
+
+Because VME is designed as a lightweight client-side application, several components are currently **mocked** or simplified. These represent the primary areas for future backend expansion:
+
+### 1. Job Queue Execution (qsub)
+- **Current State (Mocked)**: The job queue execution is simulated using a setInterval loop in AppContext.tsx. It automatically transitions jobs from queued to running, and fakes a completed or failed state based on a timeout. The execution logs are hardcoded mock strings.
+- **TODO / Real Implementation**: 
+  - Connect to a real backend service (e.g., Node.js/Express) that can spawn actual shell processes (via child_process).
+  - Stream real stdout and stderr back to the client via WebSockets or Server-Sent Events.
+  - Implement a real task queue like BullMQ or Celery.
+
+### 2. Database & Persistence
+- **Current State (Mocked)**: Uses browser localStorage as the primary data store.
+- **TODO / Real Implementation**: 
+  - Replace localStorage with a persistent database like PostgreSQL (Cloud SQL) or Firestore.
+  - Implement a backend API to manage CRUD operations for Issues, Skills, Jobs, Standups, and Blogs.
+
+### 3. Authentication
+- **Current State (Mocked)**: The app assumes a single-user environment without any login barrier.
+- **TODO / Real Implementation**: 
+  - Integrate a real authentication provider (e.g., Firebase Auth or standard OAuth) to support multi-device syncing, user accounts, and secure access.
+
+### 4. GitHub Integration
+- **Current State (Simplification)**: Uses direct REST API calls from the client to read/write a JSON file in a GitHub repository using a user-provided Personal Access Token (PAT).
+- **TODO / Real Implementation**:
+  - Storing PATs in localStorage and making client-side requests is not ideal for production security.
+  - Move GitHub API interactions to a secure backend proxy route where the token can be stored as an environment variable, or implement a proper GitHub OAuth App flow.`;
 
 export function BlogManager() {
   const { blogPosts, addBlogPost, updateBlogPost, deleteBlogPost } = useAppContext();
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewModes, setViewModes] = useState<Record<string, 'rendered' | 'raw'>>({});
+
+  const hasSeeded = useRef(false);
+
+  // Auto-seed the architecture doc safely
+  useEffect(() => {
+    if (hasSeeded.current) return;
+    hasSeeded.current = true;
+    
+    // Check for duplicates first (due to previous strict mode bugs)
+    const duplicateDocs = blogPosts.filter(p => p.title === 'Virtual Me (VME) Architecture');
+    
+    // Auto-clean up exact duplicates if they exist, leaving only one
+    if (duplicateDocs.length > 1) {
+      for (let i = 1; i < duplicateDocs.length; i++) {
+        deleteBlogPost(duplicateDocs[i].id);
+      }
+    } else if (duplicateDocs.length === 0) {
+      addBlogPost({
+        title: 'Virtual Me (VME) Architecture',
+        content: ARCHITECTURE_DOC,
+        labels: ['system', 'architecture', 'docs']
+      });
+    }
+  }, [blogPosts, addBlogPost, deleteBlogPost]);
 
   const [form, setForm] = useState({ title: '', content: '', labels: '' });
 
@@ -37,6 +119,13 @@ export function BlogManager() {
     setIsCreating(false);
     setEditingId(null);
     setForm({ title: '', content: '', labels: '' });
+  };
+
+  const toggleViewMode = (id: string) => {
+    setViewModes(prev => ({
+      ...prev,
+      [id]: prev[id] === 'raw' ? 'rendered' : 'raw'
+    }));
   };
 
   const filteredPosts = useMemo(() => {
@@ -135,18 +224,35 @@ export function BlogManager() {
           </div>
         ) : (
           filteredPosts.map(p => (
-            <div key={p.id} className="bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm hover:border-[#ccc] transition-colors group">
+            <div key={p.id} className="bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm transition-colors">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h4 className="font-semibold text-lg text-[#1a1a1a]">{p.title}</h4>
+                  <h4 className="font-semibold text-xl text-[#1a1a1a]">{p.title}</h4>
                   <p className="text-xs text-[#888888] mt-1">{new Date(p.createdAt).toLocaleString()}</p>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleEdit(p)} className="p-2 text-[#999999] hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors">
-                    Edit
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => toggleViewMode(p.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#f0f0f0] text-[#666666] hover:bg-[#e0e0e0] hover:text-[#1a1a1a] rounded-md transition-colors"
+                  >
+                    {viewModes[p.id] === 'raw' ? (
+                      <><LayoutTemplate size={14} /> Rendered View</>
+                    ) : (
+                      <><Code size={14} /> Raw Markdown</>
+                    )}
                   </button>
-                  <button onClick={() => deleteBlogPost(p.id)} className="p-2 text-[#999999] hover:text-red-500 rounded-full hover:bg-red-50 transition-colors">
-                    <Trash2 size={16} />
+                  <button 
+                    onClick={() => handleEdit(p)} 
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                  >
+                    <Edit3 size={14} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => deleteBlogPost(p.id)} 
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                    title="Delete Post"
+                  >
+                    <Trash2 size={14} /> Delete
                   </button>
                 </div>
               </div>
@@ -161,9 +267,15 @@ export function BlogManager() {
                 </div>
               )}
               
-              <div className="text-sm text-[#333333] whitespace-pre-wrap font-mono">
-                {p.content}
-              </div>
+              {viewModes[p.id] === 'raw' ? (
+                <div className="text-sm text-[#333333] whitespace-pre-wrap font-mono bg-[#f9f9f9] p-4 rounded-lg border border-[#eeeeee]">
+                  {p.content}
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none text-[#333333]">
+                  <Markdown>{p.content}</Markdown>
+                </div>
+              )}
             </div>
           ))
         )}
