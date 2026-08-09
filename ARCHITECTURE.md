@@ -27,18 +27,25 @@ The Virtual Me (VME) application is a lightweight full-stack Single Page Applica
 - **Daily Standups**: Tracks daily achievements, tomorrow's plans, and current blockers.
 - **Blog / Lessons Learned**: A space to document architectural decisions, insights, and session reports.
 
-## Areas for Expansion
+## Planned Architecture (Hackathon Migration)
 
-### 1. Job Queue Execution (qsub)
-- **Current State (Mocked)**: The job queue execution is simulated using a `setInterval` loop in `AppContext.tsx`. It automatically transitions jobs from `queued` to `running`, and fakes a `completed` or `failed` state based on a timeout. The execution logs are hardcoded mock strings.
-- **TODO / Real Implementation**: 
-  - Enhance the local Express backend to spawn actual shell processes (via `child_process`).
-  - Stream real `stdout` and `stderr` back to the client via WebSockets or Server-Sent Events.
+To support advanced agentic AI capabilities, we are planning a major architectural migration to a cloud-native Google Cloud stack.
 
-### 2. Database Refinement
-- **Current State**: Uses a single JSON blob inside a local SQLite database row.
-- **TODO**: Normalize the SQLite schema into individual tables for Issues, Skills, Jobs, Standups, and Blogs to allow for more complex querying and partial updates.
+### 1. Agentic Job Queue Execution (qsub)
+- **Current State (Mocked)**: The job queue execution is simulated using a `setInterval` loop in `AppContext.tsx`.
+- **Planned Implementation**: 
+  - Migrate execution to the **Agent Development Kit (ADK)** and **Antigravity SDK**.
+  - Instead of local shell processes, use **Genkit** to build robust AI-powered workflows.
+  - Deploy the agent runtime on **Cloud Run** so the execution engine can scale to zero when idle and scale up seamlessly for heavy jobs.
 
-### 3. Authentication
-- **Current State**: The app runs locally on a dev machine and assumes a single-user environment without any login barrier.
-- **TODO**: Optional integration of a real authentication provider or local token-based auth to support multi-device syncing and secure remote access.
+### 2. State & Persistence Migration
+- **Current State**: Uses a local SQLite database (`vme.db`) to store a single JSON blob.
+- **Planned Implementation**: 
+  - Migrate from SQLite to **Firestore**.
+  - Firestore will serve as a NoSQL "Memory Bank" for the agent, providing persistent cross-session context, schema flexibility, and real-time synchronization out-of-the-box.
+
+### 3. AI Capabilities & Orchestration
+- **Current State**: Manual or simple API calls.
+- **Planned Implementation**:
+  - Integrate **Gemini API & Google AI Studio** for core multimodal reasoning and quickstarts.
+  - Expose the workspace state (Issues, Skills, Blog) to the ADK agent, transforming the app into a true "Collaborative Partner" that acts as a digital twin.

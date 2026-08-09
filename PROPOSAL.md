@@ -3,39 +3,40 @@
 ## Hackathon: All Things Agentic Hackathon (Google)
 
 ### 1. Elevator Pitch
-**Virtual Me (vme)** is a 100% local, agentic developer workspace where an autonomous "digital twin" assists with daily engineering tasks, issue management, and workflow automation. Designed for enterprise environments, it runs entirely on your local machine with zero cloud footprint, bypassing strict corporate data policies while delivering powerful AI orchestration.
+**Virtual Me (vme)** is a cloud-native, agentic developer workspace where an autonomous "digital twin" assists with daily engineering tasks, issue management, and workflow automation. Designed to be scalable and cost-effective, it deploys seamlessly to Cloud Run and leverages a suite of modern AI frameworks to deliver powerful, stateful AI orchestration.
 
 ### 2. The Problem
-Developers suffer from constant context switching between task trackers, documentation, and terminal windows. While AI agents are becoming powerful productivity multipliers, enterprise environments often block cloud-based AI platforms and external databases due to strict privacy, security, and data exfiltration concerns. Developers in these environments are left behind in the agentic AI revolution.
+Developers suffer from constant context switching between task trackers, documentation, and terminal windows. While AI agents are becoming powerful productivity multipliers, they often lack long-term persistent memory and the ability to autonomously execute asynchronous background tasks. Developers need an intelligent digital twin that remembers their specific architectural choices and can handle long-running workflows without constant hand-holding.
 
 ### 3. The Solution (Virtual Me)
-Virtual Me is a lightweight, full-stack Single Page Application (SPA) built for the developer's local machine (React, Node.js, SQLite). It acts as an agentic command center:
-*   **Local Persistence:** Uses a local SQLite database (`vme.db`) to ensure that proprietary code, daily standups, and architectural decisions never leave the corporate network.
-*   **Agentic Task Queue (qsub):** Developers can queue up tasks (e.g., code refactoring, test generation, log analysis) that an autonomous agent picks up and executes in the background via local shell processes.
-*   **Continuous Learning Context:** The agent reads from the developer's local "Skills", "Issues", and "Blog / Lessons Learned" to build deep, context-aware reasoning that mirrors the developer's own architectural preferences.
+Virtual Me is a full-stack Single Page Application (SPA) backed by powerful Google Cloud agentic services:
+*   **Persistent Agent Memory:** Uses **Firestore** as a simple NoSQL datastore to manage the agent's long-term memory, ensuring that proprietary code, daily standups, and architectural decisions are retained across sessions.
+*   **Agentic Task Queue:** Developers can queue up complex, event-driven workflows that are processed by agents built with the **Agent Development Kit (ADK)** and the **Antigravity SDK**.
+*   **Scale-to-Zero Infrastructure:** Deployed on **Cloud Run**, the agentic backend scales out to handle compute-heavy background tasks and scales to zero when idle, making it highly cost-efficient.
 
 ### 4. Hackathon Alignment
-This project perfectly aligns with the **All Things Agentic Hackathon** themes:
-*   **Enterprise Applications:** Solves a major enterprise blocker (data privacy) by providing a 100% local, secure environment for agentic workflows.
-*   **Productivity:** Acts as a force multiplier, allowing a single developer to delegate tasks to their virtual twin while maintaining deep work focus.
-*   **Agentic Orchestration:** Moves beyond chat interfaces into real autonomous background execution (the qsub system) where agents perform multi-step jobs and report back.
+We are primarily targeting **The Collaborative Partner** track, with strong underlying elements of **The Taskmaster**.
+
+*   **The Collaborative Partner (Primary):** Virtual Me is fundamentally designed as a digital twin with persistent memory. By storing daily standups, architectural blog posts, and skill maps in **Firestore**, the agent has deep, real-time context retrieval. It doesn't start from scratch; it adapts to the developer's specific tech stack via the **Antigravity SDK**, acting as a highly personalized pairing partner.
+*   **The Taskmaster (Secondary):** Through the job queue, the agent coordinates workflows autonomously using **Genkit**. A developer can queue a high-level task, and the agent watches the queue, executes multi-step operations using the **Agent Development Kit (ADK)**, and reports the results back to the workspace.
 
 ### 5. Key Features
-*   **Offline-First & Zero Cloud Dependency:** Completely self-contained via an Express + SQLite backend.
-*   **Autonomous Job Queue:** A background runner that executes agentic workflows locally.
-*   **Digital Twin Knowledge Base:** Integrated issue tracking, daily standups, and session reports that act as the agent's long-term memory.
-*   **GitHub Sync (Optional):** Ability to sync state securely to a private enterprise GitHub repository for version control.
+*   **Cost-Efficient Scaling:** Deploys via **Cloud Run** with a single URL, automatically scaling to zero when not actively running background workflows.
+*   **Autonomous Job Queue:** A background runner built on the ADK that executes agentic workflows and tool calls.
+*   **Digital Twin Knowledge Base:** Integrated issue tracking, daily standups, and session reports stored in **Firestore** that act as the agent's long-term memory.
+*   **Open-Source Intelligence:** Powered by **Genkit** to create structured, AI-powered app features and maintain high code quality.
 
 ### 6. Tech Stack
 *   **Frontend:** React, Vite, Tailwind CSS
-*   **Backend:** Node.js, Express
-*   **Database:** SQLite (local persistence)
-*   **AI / Agentic Logic:** Google GenAI SDK (configured for secure enterprise API access or local model integration)
-*   **System Execution:** Node `child_process` for local agent actions
+*   **AI Models:** **Gemini API & Google AI Studio** (for core reasoning, multimodal features, and quickstarts)
+*   **Agent Orchestration:** **Agent Development Kit (ADK)** (Python) for building and deploying the agents, alongside the **Antigravity SDK** for a pre-packaged runtime tightly integrated with Gemini.
+*   **AI Framework:** **Genkit** (open-source framework for building AI-powered apps).
+*   **Database:** **Firestore** (simple NoSQL datastore for agent state/memory).
+*   **Deployment:** **Cloud Run** (deploy the agent with a URL; scales to zero when idle).
 
 ### 7. Future Roadmap
 *   **Multi-Agent Orchestration:** Expand the qsub system to delegate tasks to specialized sub-agents (e.g., a "QA Agent" and a "DevOps Agent").
 *   **Real-time Output Streaming:** Stream terminal output from agent-executed shell commands directly to the React frontend.
 
 ### 8. Tags
-agentic-ai, developer-tools, productivity, local-first, offline-first, digital-twin, workspace, automation, react, nodejs, sqlite, express, tailwind-css, google-ai, enterprise-software, privacy-first, job-queue, task-management, autonomous-agents, workflow-automation, ai-assistant, full-stack, hackathon, developer-experience, knowledge-management
+agentic-ai, developer-tools, productivity, digital-twin, workspace, automation, react, firestore, cloud-run, genkit, antigravity-sdk, adk, gemini-api, google-ai-studio, job-queue, task-management, autonomous-agents, workflow-automation, ai-assistant, full-stack, hackathon, developer-experience, knowledge-management
