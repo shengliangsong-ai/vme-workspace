@@ -6,12 +6,18 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc, collection } from "firebase/firestore";
 import { genkit, z } from "genkit";
 import { googleAI, gemini15Flash, textEmbedding004 } from "@genkit-ai/googleai";
+import { GoogleGenAI } from "@google/genai";
 
 // Initialize Genkit
 const ai = genkit({
   plugins: [googleAI()],
   model: gemini15Flash, // Default model
 });
+
+let genai: GoogleGenAI;
+if (process.env.GEMINI_API_KEY) {
+  genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+}
 
 function cosineSimilarity(vecA: number[], vecB: number[]) {
   let dotProduct = 0;
@@ -25,9 +31,55 @@ function cosineSimilarity(vecA: number[], vecB: number[]) {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
+async function ensureAgents() {
+  if (!genai) return;
+  try {
+    const list = await genai.agents.list();
+    const existingIds = list.agents?.map(a => a.id) || [];
+    
+    if (!existingIds.includes("vme-planner-agent")) {
+      console.log("Creating Planner Agent...");
+      await genai.agents.create({
+        id: "vme-planner-agent",
+        base_agent: "antigravity-preview-05-2026",
+        system_instruction: "You are the Planner Agent. Your job is to break down the user's request into actionable steps. Do NOT write the code yourself. Only provide the plan for the Executor Agent.",
+        base_environment: { type: "remote" }
+      });
+    }
+
+    if (!existingIds.includes("vme-executor-agent")) {
+      console.log("Creating Executor Agent...");
+      await genai.agents.create({
+        id: "vme-executor-agent",
+        base_agent: "antigravity-preview-05-2026",
+        system_instruction: "You are the Executor Agent. Your job is to follow the plan provided by the Planner Agent and execute the necessary commands to complete the task.",
+        base_environment: { type: "remote" }
+      });
+    }
+
+    if (!existingIds.includes("vme-qa-agent")) {
+      console.log("Creating QA Reviewer Agent...");
+      await genai.agents.create({
+        id: "vme-qa-agent",
+        base_agent: "antigravity-preview-05-2026",
+        system_instruction: "You are the QA Reviewer Agent. Your job is to review the code or task completed by the Executor Agent and run necessary tests. If there are issues, report them. If everything looks good, approve the task.",
+        base_environment: { type: "remote" }
+      });
+    }
+    console.log("Custom agents verified.");
+  } catch (err) {
+    console.error("Failed to ensure custom agents:", err);
+  }
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  if (genai) {
+    ensureAgents();
+  }
+
 
   app.use(express.json({ limit: "50mb" }));
 
@@ -183,6 +235,112 @@ async function startServer() {
     } catch (err) {
       console.error("Genkit chat error:", err);
       res.status(500).json({ error: "Failed to generate response" });
+    }
+  });
+
+  // Job Execution Endpoint (SSE)
+  app.get("/api/jobs/stream", async (req, res) => {
+    const { command } = req.query;
+    if (!command || typeof command !== 'string') {
+      return res.status(400).json({ error: "Command is required" });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    try {
+      if (!genai) {
+        genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      }
+      const stream = await genai.interactions.create({
+        agent: "antigravity-preview-05-2026",
+        input: `Execute the following task or command: ${command}`,
+        environment: "remote",
+        stream: true,
+      }, { timeout: 300000 });
+
+      for await (const event of stream) {
+        if (event.event_type === "step.delta" && event.delta.type === "text") {
+          res.write(`data: ${JSON.stringify({ type: 'delta', text: event.delta.text })}\n\n`);
+        } else if (event.event_type === "interaction.completed") {
+          res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+        }
+      }
+    } catch (err: any) {
+      console.error("Job execution error:", err);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+    } finally {
+      res.end();
+    }
+  });
+
+  // Job Orchestration Endpoint (SSE)
+  app.get("/api/jobs/orchestrate", async (req, res) => {
+    const { command } = req.query;
+    if (!command || typeof command !== 'string') {
+      return res.status(400).json({ error: "Command is required" });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    try {
+      if (!genai) {
+        genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      }
+
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Orchestrator] Starting multi-agent workflow for: ${command}\n\n` })}\n\n`);
+
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Planner Agent] Planning...\n` })}\n\n`);
+      const plannerRes = await genai.interactions.create({
+        agent: "vme-planner-agent",
+        input: `Plan the following task: ${command}`,
+        environment: "remote"
+      }, { timeout: 300000 });
+      const plan = plannerRes.output_text || "";
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `${plan}\n\n` })}\n\n`);
+
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Executor Agent] Executing plan...\n` })}\n\n`);
+      const stream = await genai.interactions.create({
+        agent: "vme-executor-agent",
+        input: `Execute the following plan:\n${plan}`,
+        environment: "remote",
+        stream: true,
+      }, { timeout: 300000 });
+
+      let executionOutput = "";
+      for await (const event of stream) {
+        if (event.event_type === "step.delta" && event.delta.type === "text") {
+          executionOutput += event.delta.text;
+          res.write(`data: ${JSON.stringify({ type: 'delta', text: event.delta.text })}\n\n`);
+        }
+      }
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `\n\n[QA Reviewer Agent] Reviewing execution...\n` })}\n\n`);
+
+      const qaRes = await genai.interactions.create({
+        agent: "vme-qa-agent",
+        input: `Review the following execution log for the plan:\n\nPlan:\n${plan}\n\nExecution:\n${executionOutput}`,
+        environment: "remote"
+      }, { timeout: 300000 });
+      const qaOutput = qaRes.output_text || "";
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `${qaOutput}\n\n` })}\n\n`);
+
+      res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+    } catch (err: any) {
+      console.error("Orchestration error:", err);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+    } finally {
+      res.end();
     }
   });
 

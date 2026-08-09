@@ -109,46 +109,80 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }).catch(e => console.warn("Failed to sync state to backend DB", e));
   }, [state, isLoaded]);
 
-  // Mock Job Execution Loop
+  // Real Job Execution Loop
   useEffect(() => {
-    const processJobs = () => {
-      if (processingRef.current) return;
-      processingRef.current = true;
+    const queuedJob = state.jobs.find(j => j.status === 'queued');
+    const runningJob = state.jobs.find(j => j.status === 'running');
+    
+    if (!queuedJob || runningJob || processingRef.current) return;
+    
+    processingRef.current = true;
 
-      setState(s => {
-        let hasChanges = false;
-        const newJobs = [...s.jobs];
-        
-        // Find running job
-        const runningIndex = newJobs.findIndex(j => j.status === 'running');
-        if (runningIndex !== -1) {
-          const runningJob = newJobs[runningIndex];
-          const now = Date.now();
-          if (runningJob.startedAt && now - runningJob.startedAt > runningJob.timeoutMs) {
-            // timeout reached
-            newJobs[runningIndex] = { ...runningJob, status: 'failed', log: runningJob.log + '\nError: Timeout reached', completedAt: now };
-            hasChanges = true;
-          } else if (runningJob.startedAt && now - runningJob.startedAt > 2000) { // Fake completion after 2s if no timeout
-             newJobs[runningIndex] = { ...runningJob, status: 'completed', log: runningJob.log + '\nExecution completed successfully.', completedAt: now };
-             hasChanges = true;
-          }
-        } else {
-          // Find next queued job
-          const queuedIndex = newJobs.findIndex(j => j.status === 'queued');
-          if (queuedIndex !== -1) {
-            newJobs[queuedIndex] = { ...newJobs[queuedIndex], status: 'running', startedAt: Date.now(), log: '> ' + newJobs[queuedIndex].command + '\nStarting execution...' };
-            hasChanges = true;
-          }
+    setState(s => ({
+      ...s,
+      jobs: s.jobs.map(j => j.id === queuedJob.id 
+        ? { ...j, status: 'running', startedAt: Date.now(), log: '> ' + j.command + '\nStarting execution...\n' }
+        : j)
+    }));
+
+    let endpoint = `/api/jobs/stream?command=${encodeURIComponent(queuedJob.command)}`;
+    if (queuedJob.command.toLowerCase().startsWith('orchestrate ')) {
+      const actualCommand = queuedJob.command.substring(12).trim();
+      endpoint = `/api/jobs/orchestrate?command=${encodeURIComponent(actualCommand)}`;
+    }
+
+    const eventSource = new EventSource(endpoint);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'delta') {
+          setState(s => ({
+            ...s,
+            jobs: s.jobs.map(j => j.id === queuedJob.id 
+              ? { ...j, log: j.log + data.text }
+              : j)
+          }));
+        } else if (data.type === 'completed') {
+          setState(s => ({
+            ...s,
+            jobs: s.jobs.map(j => j.id === queuedJob.id 
+              ? { ...j, status: 'completed', completedAt: Date.now(), log: j.log + '\n\nExecution completed successfully.' }
+              : j)
+          }));
+          eventSource.close();
+          processingRef.current = false;
+        } else if (data.type === 'error') {
+          setState(s => ({
+            ...s,
+            jobs: s.jobs.map(j => j.id === queuedJob.id 
+              ? { ...j, status: 'failed', completedAt: Date.now(), log: j.log + '\n\nError: ' + data.message }
+              : j)
+          }));
+          eventSource.close();
+          processingRef.current = false;
         }
-
-        processingRef.current = false;
-        return hasChanges ? { ...s, jobs: newJobs } : s;
-      });
+      } catch (e) {
+        console.error("Failed to parse SSE message", e);
+      }
     };
 
-    const intervalId = setInterval(processJobs, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
+    eventSource.onerror = () => {
+      setState(s => ({
+        ...s,
+        jobs: s.jobs.map(j => j.id === queuedJob.id && j.status === 'running'
+          ? { ...j, status: 'failed', completedAt: Date.now(), log: j.log + '\n\nConnection to server lost.' }
+          : j)
+      }));
+      eventSource.close();
+      processingRef.current = false;
+    };
+
+    return () => {
+      eventSource.close();
+      processingRef.current = false;
+    };
+  }, [state.jobs]);
 
   const submitJob = (command: string, timeoutMs: number) => {
     const newJob: Job = {
