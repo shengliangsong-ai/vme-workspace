@@ -1,9 +1,17 @@
 import express from "express";
 import path from "path";
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
 import { createServer as createViteServer } from "vite";
 import fs from "fs";
+import { initializeApp, applicationDefault } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { genkit, z } from "genkit";
+import { googleAI, gemini15Flash } from "@genkit-ai/googleai";
+
+// Initialize Genkit
+const ai = genkit({
+  plugins: [googleAI()],
+  model: gemini15Flash, // Default model
+});
 
 async function startServer() {
   const app = express();
@@ -11,39 +19,39 @@ async function startServer() {
 
   app.use(express.json({ limit: "50mb" }));
 
-  // Initialize SQLite database
-  const dbPath = path.join(process.cwd(), "vme.db");
-  const db = await open({
-    filename: dbPath,
-    driver: sqlite3.Database,
-  });
-
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS state (
-      id INTEGER PRIMARY KEY,
-      data TEXT NOT NULL
-    )
-  `);
-
-  // Ensure there's a row
-  const row = await db.get("SELECT data FROM state WHERE id = 1");
-  if (!row) {
-    await db.run("INSERT INTO state (id, data) VALUES (1, ?)", JSON.stringify({
-      issues: [],
-      skills: [],
-      jobs: [],
-      standups: [],
-      blogPosts: [],
-      sessionReports: [],
-      settings: {}
-    }));
+  // Initialize Firebase Admin
+  let db: FirebaseFirestore.Firestore;
+  if (fs.existsSync('./firebase-applet-config.json')) {
+    const config = JSON.parse(fs.readFileSync('./firebase-applet-config.json', 'utf8'));
+    const firebaseApp = initializeApp({
+      credential: applicationDefault(),
+      projectId: config.projectId
+    });
+    db = getFirestore(firebaseApp, config.firestoreDatabaseId || '(default)');
+  } else {
+    throw new Error("Missing firebase-applet-config.json");
   }
 
   // API Routes
   app.get("/api/state", async (req, res) => {
     try {
-      const row = await db.get("SELECT data FROM state WHERE id = 1");
-      res.json(JSON.parse(row.data));
+      const docRef = db.collection('workspaces').doc('default');
+      const docSnap = await docRef.get();
+      if (!docSnap.exists) {
+        const initialState = {
+          issues: [],
+          skills: [],
+          jobs: [],
+          standups: [],
+          blogPosts: [],
+          sessionReports: [],
+          settings: {}
+        };
+        await docRef.set(initialState);
+        res.json(initialState);
+      } else {
+        res.json(docSnap.data());
+      }
     } catch (err) {
       console.error("Failed to load state", err);
       res.status(500).json({ error: "Failed to load state" });
@@ -52,11 +60,35 @@ async function startServer() {
 
   app.post("/api/state", async (req, res) => {
     try {
-      await db.run("UPDATE state SET data = ? WHERE id = 1", JSON.stringify(req.body));
+      const docRef = db.collection('workspaces').doc('default');
+      await docRef.set(req.body);
       res.json({ success: true });
     } catch (err) {
       console.error("Failed to save state", err);
       res.status(500).json({ error: "Failed to save state" });
+    }
+  });
+
+  // Genkit Chat endpoint
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { prompt } = req.body;
+      if (!prompt) {
+        return res.status(400).json({ error: "Prompt is required" });
+      }
+
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
+      }
+
+      const response = await ai.generate({
+        prompt: prompt,
+      });
+
+      res.json({ text: response.text });
+    } catch (err) {
+      console.error("Genkit chat error:", err);
+      res.status(500).json({ error: "Failed to generate response" });
     }
   });
 

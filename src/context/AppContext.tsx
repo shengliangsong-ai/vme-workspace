@@ -101,12 +101,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
     localStorage.setItem('vme-state', JSON.stringify(state));
     
-    // Attempt to sync to local sqlite DB
+    // Attempt to sync to local Firestore DB via Express backend
     fetch('/api/state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(state)
-    }).catch(e => console.warn("Failed to sync state to local DB", e));
+    }).catch(e => console.warn("Failed to sync state to backend DB", e));
   }, [state, isLoaded]);
 
   // Mock Job Execution Loop
