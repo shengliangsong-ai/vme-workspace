@@ -312,15 +312,34 @@ async function startServer() {
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Orchestrator] Starting multi-agent workflow for: ${command}\n\n` })}\n\n`);
 
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Planner Agent] Planning...\n` })}\n\n`);
-      const plannerRes = await genai.interactions.create({
-        agent: "vme-planner-agent",
-        input: `Plan the following task: ${command}`,
-        environment: "remote"
-      }, { timeout: 300000 });
-      const plan = plannerRes.output_text || "";
-      res.write(`data: ${JSON.stringify({ type: 'delta', text: `${plan}\n\n` })}\n\n`);
+      
+      let seconds = 0;
+      const progressInterval = setInterval(() => {
+        seconds++;
+        let text = `[Planner Agent] Planning in progress... (${seconds}s elapsed)\n`;
+        if (seconds % 30 === 0) {
+          text += `[☑️] Checkpoint reached: ${seconds} seconds of planning completed.\n`;
+        }
+        res.write(`data: ${JSON.stringify({ type: 'delta', text })}\n\n`);
+      }, 1000);
 
-      res.write(`data: ${JSON.stringify({ type: 'awaiting_approval', plan: plan })}\n\n`);
+      try {
+        const plannerRes = await genai.interactions.create({
+          agent: "vme-planner-agent",
+          input: `Plan the following task: ${command}`,
+          environment: "remote"
+        }, { timeout: 300000 });
+        
+        clearInterval(progressInterval);
+        
+        const plan = plannerRes.output_text || "";
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `\n[Planner Agent] Plan generated:\n${plan}\n\n` })}\n\n`);
+
+        res.write(`data: ${JSON.stringify({ type: 'awaiting_approval', plan: plan })}\n\n`);
+      } catch (innerErr) {
+        clearInterval(progressInterval);
+        throw innerErr;
+      }
     } catch (err: any) {
       console.error("Orchestration error:", err);
       res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
