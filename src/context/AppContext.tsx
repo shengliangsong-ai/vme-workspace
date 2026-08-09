@@ -54,28 +54,60 @@ const initialState: AppState = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('vme-state');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return { 
-        ...initialState, 
-        ...parsed, 
-        jobs: parsed.jobs || [],
-        standups: parsed.standups || [],
-        blogPosts: parsed.blogPosts || [],
-        sessionReports: parsed.sessionReports || []
-      };
-    }
-    return initialState;
-  });
-  
+  const [state, setState] = useState<AppState>(initialState);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const processingRef = useRef(false);
 
   useEffect(() => {
+    const loadState = async () => {
+      try {
+        const res = await fetch('/api/state');
+        if (res.ok) {
+          const parsed = await res.json();
+          setState({ 
+            ...initialState, 
+            ...parsed, 
+            jobs: parsed.jobs || [],
+            standups: parsed.standups || [],
+            blogPosts: parsed.blogPosts || [],
+            sessionReports: parsed.sessionReports || []
+          });
+          setIsLoaded(true);
+          return;
+        }
+      } catch (e) {
+        console.warn("Could not load from API, falling back to localStorage", e);
+      }
+      
+      const saved = localStorage.getItem('vme-state');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setState({ 
+          ...initialState, 
+          ...parsed, 
+          jobs: parsed.jobs || [],
+          standups: parsed.standups || [],
+          blogPosts: parsed.blogPosts || [],
+          sessionReports: parsed.sessionReports || []
+        });
+      }
+      setIsLoaded(true);
+    };
+    loadState();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
     localStorage.setItem('vme-state', JSON.stringify(state));
-  }, [state]);
+    
+    // Attempt to sync to local sqlite DB
+    fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    }).catch(e => console.warn("Failed to sync state to local DB", e));
+  }, [state, isLoaded]);
 
   // Mock Job Execution Loop
   useEffect(() => {
@@ -359,7 +391,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addSessionReport,
       isSyncing
     }}>
-      {children}
+      {isLoaded ? children : <div className="h-screen w-screen flex items-center justify-center text-[#999999]">Loading workspace...</div>}
     </AppContext.Provider>
   );
 }
