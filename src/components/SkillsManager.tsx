@@ -40,7 +40,7 @@ export function SkillsManager() {
         </div>
         <button
           onClick={handleStartCreate}
-          className="flex items-center gap-2 bg-black hover:bg-black/80 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm"
         >
           <Plus size={16} /> Add Skill
         </button>
@@ -106,7 +106,7 @@ export function SkillsManager() {
             <button
               onClick={handleSave}
               disabled={!editForm.name.trim() || !editForm.content.trim()}
-              className="flex items-center gap-2 bg-black hover:bg-black/80 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm"
             >
               <Save size={16} /> Save Skill
             </button>

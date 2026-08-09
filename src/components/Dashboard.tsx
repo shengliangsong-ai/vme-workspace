@@ -46,7 +46,7 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
             <h3 className="text-lg font-medium text-[#1a1a1a]">Recent Issues</h3>
             <button
               onClick={() => setIsCreating(true)}
-              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-xs font-semibold transition-colors"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm"
             >
               <Plus size={16} /> New Issue
             </button>
@@ -71,9 +71,9 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
                   <option value="bug">Bug Fix</option>
                   <option value="feature">New Feature</option>
                 </select>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setIsCreating(false)} className="px-4 py-2 text-xs font-semibold text-[#666666] hover:text-[#1a1a1a]">Cancel</button>
-                  <button type="submit" className="bg-black text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-black/80">Create</button>
+                <div className="flex gap-2 items-center">
+                  <button type="button" onClick={() => setIsCreating(false)} className="px-4 py-2 text-xs font-semibold text-[#666666] hover:text-[#1a1a1a] transition-colors">Cancel</button>
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm">Create</button>
                 </div>
               </div>
             </form>
@@ -119,7 +119,7 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
                   className={cn(
                     "px-4 py-2 rounded-full transition-colors flex items-center gap-2 text-xs font-semibold",
                     issue.id === activeIssueId
-                      ? "bg-black text-white"
+                      ? "bg-blue-600 text-white"
                       : "bg-[#f0f0f0] text-[#1a1a1a] hover:bg-[#e5e5e5]"
                   )}
                 >
@@ -147,7 +147,7 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
                  </div>
                  <div className="h-2 w-full bg-[#f0f0f0] rounded-full overflow-hidden">
                    <div 
-                    className="h-full bg-[#111]" 
+                    className="h-full bg-blue-600" 
                     style={{width: `${(activeIssue.steps.filter(s => s.isCompleted).length / activeIssue.steps.length) * 100}%`}}
                    ></div>
                  </div>
@@ -155,7 +155,7 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
                
                <button 
                  onClick={() => setCurrentTab('workspace')}
-                 className="w-full bg-[#111] hover:bg-black text-white py-2 rounded-full text-xs font-semibold transition-colors mt-2"
+                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-full text-xs font-semibold transition-colors mt-2"
                >
                  Go to Workspace
                </button>
@@ -167,23 +167,34 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
            )}
            </div>
            
-           <div className="bg-[#111] text-white p-6 rounded-xl shadow-lg">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-[#666] mb-4">Virtual Me Status</h4>
+           <div className="bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#999999] mb-4">Virtual Me Status</h4>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs">Skills Synchronized</span>
-                  <span className="text-[10px] px-2 py-1 bg-white/10 rounded">{skills.length} Active</span>
+                  <span className="text-xs font-medium text-[#1a1a1a]">Skills Synchronized</span>
+                  <span className="text-[10px] px-2 py-1 bg-[#f0f0f0] text-[#1a1a1a] rounded font-semibold">{skills.length} Active</span>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-white/10">
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-[#eeeeee]">
                   {skills.slice(0, 5).map(skill => (
-                    <span key={skill.id} className="text-[10px] bg-white/10 text-white/80 px-2 py-1 rounded">
+                    <span key={skill.id} className="text-[10px] bg-[#f0f0f0] text-[#666666] border border-[#e5e5e5] px-2 py-1 rounded">
                       {skill.name}
                     </span>
                   ))}
                   {skills.length > 5 && (
-                    <span className="text-[10px] text-white/50 px-2 py-1">+{skills.length - 5} more</span>
+                    <span className="text-[10px] text-[#999999] px-2 py-1">+{skills.length - 5} more</span>
                   )}
                 </div>
+              </div>
+           </div>
+
+           {/* Job Queue Status */}
+           <div className="bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm cursor-pointer hover:border-[#ccc] transition-colors" onClick={() => setCurrentTab('queue')}>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#999999] mb-4">Job Queue</h4>
+              <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-[#1a1a1a]">Active Jobs</span>
+                  <span className="text-[10px] px-2 py-1 bg-[#f0f0f0] text-[#1a1a1a] rounded font-semibold">
+                    {useAppContext().jobs.filter(j => j.status === 'running' || j.status === 'queued').length} pending
+                  </span>
               </div>
            </div>
         </div>

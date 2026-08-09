@@ -69,7 +69,7 @@ export function Workspace() {
                   }}
                   className="text-[#999999] hover:text-[#1a1a1a] transition-colors shrink-0"
                 >
-                  {step.isCompleted ? <CheckCircle2 className="text-black" size={24} /> : <Circle size={24} />}
+                  {step.isCompleted ? <CheckCircle2 className="text-blue-600" size={24} /> : <Circle size={24} />}
                 </button>
                 
                 <div className="flex-1 flex items-center justify-between">

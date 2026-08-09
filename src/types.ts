@@ -5,6 +5,19 @@ export interface WorkflowStep {
   content: string;
 }
 
+export type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface Job {
+  id: string;
+  command: string;
+  timeoutMs: number;
+  status: JobStatus;
+  createdAt: number;
+  startedAt?: number;
+  completedAt?: number;
+  log: string;
+}
+
 export interface Issue {
   id: string;
   title: string;
@@ -39,6 +52,7 @@ export interface AppState {
   skills: Skill[];
   settings: Settings;
   activeIssueId: string | null;
+  jobs: Job[];
 }
 
 export const DEFAULT_BUG_STEPS = [

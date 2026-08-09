@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 interface SidebarProps {
@@ -13,6 +13,7 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
   
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'queue', label: 'Job Queue', icon: ListTodo },
     { id: 'workspace', label: 'Active Workspace', icon: CheckSquare },
     { id: 'skills', label: 'Skills & Context', icon: BrainCircuit },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -21,7 +22,7 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
   return (
     <div className="w-64 bg-white text-[#1a1a1a] flex flex-col border-r border-[#eeeeee]">
       <div className="p-4 border-b border-[#eeeeee] flex items-center gap-3">
-        <div className="w-8 h-8 rounded bg-black flex items-center justify-center text-white font-bold">
+        <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold">
           VM
         </div>
         <div>
@@ -52,11 +53,11 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-[#eeeeee] flex flex-col gap-2">
+      <div className="p-4 border-t border-[#eeeeee] flex flex-col gap-3">
         <button
           onClick={syncToGitHub}
           disabled={isSyncing || !settings.githubToken}
-          className="flex items-center justify-center gap-2 w-full py-2 bg-black hover:bg-black/80 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-semibold transition-colors text-white"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-semibold transition-colors text-white shadow-sm"
         >
           {isSyncing ? <RefreshCw size={16} className="animate-spin" /> : <Github size={16} />}
           Push to GitHub
@@ -64,7 +65,7 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
         <button
           onClick={pullFromGitHub}
           disabled={isSyncing || !settings.githubToken}
-          className="flex items-center justify-center gap-2 w-full py-2 bg-[#f0f0f0] hover:bg-[#e5e5e5] disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-semibold transition-colors text-[#1a1a1a]"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#f0f0f0] hover:bg-[#e5e5e5] disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-semibold transition-colors text-[#1a1a1a]"
         >
           {isSyncing ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />}
           Pull State

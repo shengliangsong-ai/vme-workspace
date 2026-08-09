@@ -5,6 +5,7 @@ import { SettingsView } from './components/Settings';
 import { Workspace } from './components/Workspace';
 import { SkillsManager } from './components/SkillsManager';
 import { Dashboard } from './components/Dashboard';
+import { QueueManager } from './components/QueueManager';
 
 function MainLayout() {
   const [currentTab, setCurrentTab] = useState('dashboard');
@@ -17,6 +18,7 @@ function MainLayout() {
         {currentTab === 'workspace' && <Workspace />}
         {currentTab === 'skills' && <SkillsManager />}
         {currentTab === 'settings' && <SettingsView />}
+        {currentTab === 'queue' && <QueueManager />}
       </main>
     </div>
   );
