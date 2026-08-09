@@ -91,13 +91,24 @@ export function QueueManager() {
           <div className="flex-1 bg-white border border-[#eeeeee] rounded-xl shadow-sm flex flex-col overflow-hidden">
             <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#999999]">Job Queue ({jobs.length})</h3>
-              <button
-                onClick={() => submitJob('self_improve', 120000)}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center"
-              >
-                <Activity size={14} className="mr-1" />
-                Run Self-Improvement
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    submitJob('orchestrate Review our current architecture and propose a new SQLite schema design for issues and skills.', 60000);
+                  }}
+                  className="text-xs font-semibold text-purple-600 hover:text-purple-700 flex items-center bg-purple-50 px-2 py-1 rounded"
+                >
+                  <Play size={14} className="mr-1" />
+                  Demo: Orchestrate
+                </button>
+                <button
+                  onClick={() => submitJob('self_improve', 120000)}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center bg-blue-50 px-2 py-1 rounded"
+                >
+                  <Activity size={14} className="mr-1" />
+                  Run Self-Improvement
+                </button>
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto p-2">
               {jobs.length === 0 ? (
