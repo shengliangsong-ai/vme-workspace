@@ -1,0 +1,8 @@
+{
+  "name": "Virtual Me (vme) Workspace",
+  "description": "Claude context, skills, and memory manager synchronized with GitHub. Optimized for 1M token workflows.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

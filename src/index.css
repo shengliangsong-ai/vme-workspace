@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[#cccccc] rounded-full border-[2px] border-solid border-[#fdfdfd];
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-[#aaaaaa];
+}

@@ -1,0 +1,31 @@
+import React, { useState } from 'react';
+import { AppProvider } from './context/AppContext';
+import { Sidebar } from './components/Sidebar';
+import { SettingsView } from './components/Settings';
+import { Workspace } from './components/Workspace';
+import { SkillsManager } from './components/SkillsManager';
+import { Dashboard } from './components/Dashboard';
+
+function MainLayout() {
+  const [currentTab, setCurrentTab] = useState('dashboard');
+
+  return (
+    <div className="flex h-screen bg-[#fdfdfd] text-[#1a1a1a] font-sans overflow-hidden">
+      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <main className="flex-1 h-full overflow-y-auto bg-[#f9f9f9]">
+        {currentTab === 'dashboard' && <Dashboard setCurrentTab={setCurrentTab} />}
+        {currentTab === 'workspace' && <Workspace />}
+        {currentTab === 'skills' && <SkillsManager />}
+        {currentTab === 'settings' && <SettingsView />}
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <MainLayout />
+    </AppProvider>
+  );
+}
