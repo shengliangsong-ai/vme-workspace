@@ -89,8 +89,15 @@ export function QueueManager() {
 
           {/* Queue List */}
           <div className="flex-1 bg-white border border-[#eeeeee] rounded-xl shadow-sm flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-[#eeeeee]">
+            <div className="p-4 border-b border-[#eeeeee] flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#999999]">Job Queue ({jobs.length})</h3>
+              <button
+                onClick={() => submitJob('self_improve', 120000)}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center"
+              >
+                <Activity size={14} className="mr-1" />
+                Run Self-Improvement
+              </button>
             </div>
             <div className="flex-1 overflow-y-auto p-2">
               {jobs.length === 0 ? (

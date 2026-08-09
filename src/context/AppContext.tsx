@@ -145,6 +145,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else if (queuedJob.command.toLowerCase().startsWith('execute_plan ')) {
       const plan = queuedJob.command.substring(13).trim();
       endpoint = `/api/jobs/execute?plan=${encodeURIComponent(plan)}`;
+    } else if (queuedJob.command.toLowerCase() === 'self_improve') {
+      endpoint = `/api/jobs/self_improve`;
     }
 
     const eventSource = new EventSource(endpoint);

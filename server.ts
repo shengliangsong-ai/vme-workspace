@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import fs from "fs";
+import crypto from "crypto";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc, collection } from "firebase/firestore";
 import { genkit, z } from "genkit";
@@ -63,6 +64,15 @@ async function ensureAgents() {
         id: "vme-qa-agent",
         base_agent: "antigravity-preview-05-2026",
         system_instruction: "You are the QA Reviewer Agent. Your job is to review the code or task completed by the Executor Agent and run necessary tests. If there are issues, report them. If everything looks good, approve the task.",
+        base_environment: { type: "remote" }
+      });
+    }
+    if (!existingIds.includes("vme-evaluator-agent")) {
+      console.log("Creating Evaluator Agent...");
+      await genai.agents.create({
+        id: "vme-evaluator-agent",
+        base_agent: "antigravity-preview-05-2026",
+        system_instruction: "You are the Evaluator Agent. Your job is to review the execution logs of past jobs, analyze what went wrong or what could be improved, and generate a new Skill document (JSON) that captures these learnings.",
         base_environment: { type: "remote" }
       });
     }
@@ -366,6 +376,79 @@ async function startServer() {
       res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
     } catch (err: any) {
       console.error("Execution error:", err);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+    } finally {
+      res.end();
+    }
+  });
+
+  app.get("/api/jobs/self_improve", async (req, res) => {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    try {
+      if (!genai) {
+        genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      }
+
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Self-Improvement] Fetching recent jobs...\n` })}\n\n`);
+      const docRef = doc(db, 'workspaces', 'default');
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        throw new Error("No workspace data found.");
+      }
+      
+      const state = docSnap.data();
+      const recentJobs = (state.jobs || []).slice(-5);
+      if (recentJobs.length === 0) {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `No recent jobs to learn from.\n` })}\n\n`);
+        return res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+      }
+
+      const jobLogs = recentJobs.map((j: any) => `Command: ${j.command}\nStatus: ${j.status}\nLogs:\n${j.log}`).join("\n\n---\n\n");
+
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Evaluator Agent] Analyzing recent execution logs and generating new skill...\n\n` })}\n\n`);
+      const evaluatorRes = await genai.interactions.create({
+        agent: "vme-evaluator-agent",
+        input: `Review these recent jobs and create a new skill JSON object with "name", "description", and "content" fields. If no new skill is needed, return an empty object.\n\n${jobLogs}`,
+        environment: "remote"
+      }, { timeout: 300000 });
+      
+      const skillText = evaluatorRes.output_text || "{}";
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `Analysis complete. Extracted knowledge:\n${skillText}\n\n` })}\n\n`);
+      
+      try {
+        const jsonMatch = skillText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const skillData = JSON.parse(jsonMatch[0]);
+          if (skillData.name && skillData.description && skillData.content) {
+             const newSkill = {
+                id: crypto.randomUUID(),
+                name: skillData.name,
+                description: skillData.description,
+                content: skillData.content,
+                tags: ['auto-generated'],
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+             };
+             
+             state.skills = [...(state.skills || []), newSkill];
+             await setDoc(docRef, state);
+             res.write(`data: ${JSON.stringify({ type: 'delta', text: `[System] New skill '${newSkill.name}' saved to Firestore.\n\n` })}\n\n`);
+          }
+        }
+      } catch (e) {
+         res.write(`data: ${JSON.stringify({ type: 'delta', text: `[System] Could not parse skill data.\n\n` })}\n\n`);
+      }
+
+      res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+    } catch (err: any) {
+      console.error("Self improvement error:", err);
       res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
     } finally {
       res.end();
