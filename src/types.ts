@@ -5,7 +5,7 @@ export interface WorkflowStep {
   content: string;
 }
 
-export type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+export type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'awaiting_approval';
 
 export interface Job {
   id: string;
@@ -16,6 +16,7 @@ export interface Job {
   startedAt?: number;
   completedAt?: number;
   log: string;
+  plan?: string;
 }
 
 export interface Standup {

@@ -310,6 +310,34 @@ async function startServer() {
       const plan = plannerRes.output_text || "";
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `${plan}\n\n` })}\n\n`);
 
+      res.write(`data: ${JSON.stringify({ type: 'awaiting_approval', plan: plan })}\n\n`);
+    } catch (err: any) {
+      console.error("Orchestration error:", err);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+    } finally {
+      res.end();
+    }
+  });
+
+  app.get("/api/jobs/execute", async (req, res) => {
+    const { plan } = req.query;
+    if (!plan || typeof plan !== 'string') {
+      return res.status(400).json({ error: "Plan is required" });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    try {
+      if (!genai) {
+        genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      }
+
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Executor Agent] Executing plan...\n` })}\n\n`);
       const stream = await genai.interactions.create({
         agent: "vme-executor-agent",
@@ -337,7 +365,7 @@ async function startServer() {
 
       res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
     } catch (err: any) {
-      console.error("Orchestration error:", err);
+      console.error("Execution error:", err);
       res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
     } finally {
       res.end();

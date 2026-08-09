@@ -20,6 +20,7 @@ interface AppContextType extends AppState {
   cancelJob: (id: string) => void;
   reorderJob: (id: string, newIndex: number) => void;
   deleteJob: (id: string) => void;
+  approveJob: (id: string) => void;
   
   addStandup: (standup: Omit<Standup, 'id' | 'createdAt'>) => void;
   updateStandup: (id: string, updates: Partial<Standup>) => void;
@@ -65,10 +66,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch('/api/state');
         if (res.ok) {
           const parsed = await res.json();
+          const recoveredJobs = (parsed.jobs || []).map((j: Job) => {
+            if (j.status === 'running') {
+              return { ...j, status: 'failed', log: j.log + '\n\n[System] Job failed due to unexpected shutdown or crash.' };
+            }
+            return j;
+          });
           setState({ 
             ...initialState, 
             ...parsed, 
-            jobs: parsed.jobs || [],
+            jobs: recoveredJobs,
             standups: parsed.standups || [],
             blogPosts: parsed.blogPosts || [],
             sessionReports: parsed.sessionReports || []
@@ -83,10 +90,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem('vme-state');
       if (saved) {
         const parsed = JSON.parse(saved);
+        const recoveredJobs = (parsed.jobs || []).map((j: Job) => {
+          if (j.status === 'running') {
+            return { ...j, status: 'failed', log: j.log + '\n\n[System] Job failed due to unexpected shutdown or crash.' };
+          }
+          return j;
+        });
         setState({ 
           ...initialState, 
           ...parsed, 
-          jobs: parsed.jobs || [],
+          jobs: recoveredJobs,
           standups: parsed.standups || [],
           blogPosts: parsed.blogPosts || [],
           sessionReports: parsed.sessionReports || []
@@ -129,6 +142,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (queuedJob.command.toLowerCase().startsWith('orchestrate ')) {
       const actualCommand = queuedJob.command.substring(12).trim();
       endpoint = `/api/jobs/orchestrate?command=${encodeURIComponent(actualCommand)}`;
+    } else if (queuedJob.command.toLowerCase().startsWith('execute_plan ')) {
+      const plan = queuedJob.command.substring(13).trim();
+      endpoint = `/api/jobs/execute?plan=${encodeURIComponent(plan)}`;
     }
 
     const eventSource = new EventSource(endpoint);
@@ -148,6 +164,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ...s,
             jobs: s.jobs.map(j => j.id === queuedJob.id 
               ? { ...j, status: 'completed', completedAt: Date.now(), log: j.log + '\n\nExecution completed successfully.' }
+              : j)
+          }));
+          eventSource.close();
+          processingRef.current = false;
+        } else if (data.type === 'awaiting_approval') {
+          setState(s => ({
+            ...s,
+            jobs: s.jobs.map(j => j.id === queuedJob.id 
+              ? { ...j, status: 'awaiting_approval', plan: data.plan, log: j.log + '\n\n[System] Awaiting your approval to proceed.' }
               : j)
           }));
           eventSource.close();
@@ -218,6 +243,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteJob = (id: string) => {
     setState(s => ({ ...s, jobs: s.jobs.filter(j => j.id !== id) }));
+  };
+
+  const approveJob = (id: string) => {
+    setState(s => ({
+      ...s,
+      jobs: s.jobs.map(j => {
+        if (j.id === id && j.status === 'awaiting_approval' && j.plan) {
+          return {
+            ...j,
+            status: 'queued',
+            command: `execute_plan ${j.plan}`
+          };
+        }
+        return j;
+      })
+    }));
   };
 
   const updateSettings = (settings: Settings) => {
@@ -416,6 +457,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       cancelJob,
       reorderJob,
       deleteJob,
+      approveJob,
       addStandup,
       updateStandup,
       deleteStandup,

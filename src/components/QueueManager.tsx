@@ -3,15 +3,17 @@ import { useAppContext } from '../context/AppContext';
 import { Play, X, Trash2, ArrowUp, ArrowDown, Clock, Activity, CheckCircle2, XCircle } from 'lucide-react';
 
 export function QueueManager() {
-  const { jobs, submitJob, cancelJob, reorderJob, deleteJob } = useAppContext();
+  const { jobs, submitJob, cancelJob, reorderJob, deleteJob, approveJob } = useAppContext();
   const [command, setCommand] = useState('');
   const [timeoutMs, setTimeoutMs] = useState(5000);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [isOrchestrated, setIsOrchestrated] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!command.trim()) return;
-    submitJob(command, timeoutMs);
+    const finalCommand = isOrchestrated ? `orchestrate ${command}` : command;
+    submitJob(finalCommand, timeoutMs);
     setCommand('');
   };
 
@@ -22,6 +24,7 @@ export function QueueManager() {
       case 'completed': return <CheckCircle2 size={16} className="text-emerald-500" />;
       case 'failed': return <XCircle size={16} className="text-red-500" />;
       case 'cancelled': return <XCircle size={16} className="text-[#999999]" />;
+      case 'awaiting_approval': return <Clock size={16} className="text-amber-500 animate-pulse" />;
       default: return null;
     }
   };
@@ -62,6 +65,17 @@ export function QueueManager() {
                   step="1000"
                   className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-2 text-[#1a1a1a] focus:outline-none focus:border-[#ccc]"
                 />
+              </div>
+              <div className="flex flex-col mb-2">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-[#1a1a1a]">
+                  <input
+                    type="checkbox"
+                    checked={isOrchestrated}
+                    onChange={(e) => setIsOrchestrated(e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  Use Multi-Agent Orchestration
+                </label>
               </div>
               <button
                 type="submit"
@@ -119,7 +133,7 @@ export function QueueManager() {
                             </button>
                           </>
                         )}
-                        {(job.status === 'queued' || job.status === 'running') && (
+                        {(job.status === 'queued' || job.status === 'running' || job.status === 'awaiting_approval') && (
                           <button 
                             onClick={(e) => { e.stopPropagation(); cancelJob(job.id); }}
                             className="p-1 text-[#999999] hover:text-red-500"
@@ -128,7 +142,16 @@ export function QueueManager() {
                             <X size={16} />
                           </button>
                         )}
-                        {(job.status !== 'queued' && job.status !== 'running') && (
+                        {job.status === 'awaiting_approval' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); approveJob(job.id); }}
+                            className="p-1 text-emerald-500 hover:text-emerald-600 font-bold ml-2"
+                            title="Approve Plan"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {(job.status !== 'queued' && job.status !== 'running' && job.status !== 'awaiting_approval') && (
                           <button 
                             onClick={(e) => { e.stopPropagation(); deleteJob(job.id); if (selectedJobId === job.id) setSelectedJobId(null); }}
                             className="p-1 text-[#999999] hover:text-red-500"
