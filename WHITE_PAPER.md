@@ -19,7 +19,7 @@ Virtual Me is constructed as a modern, cloud-native full-stack application desig
 
 ```mermaid
 graph TB
-    subgraph Client [Client-Side (Browser)]
+    subgraph Client-Side
         UI[React 19 + Vite]
         State[React Context API]
         SSE_Client[EventSource / SSE Client]
@@ -27,14 +27,14 @@ graph TB
         State --> SSE_Client
     end
 
-    subgraph Server [Server-Side (Express)]
+    subgraph Server-Side
         API[REST & SSE Endpoints]
         Router[Job Router / qsub]
         Genkit_Core[Google Genkit Orchestrator]
         Embedder[textEmbedding-004]
     end
 
-    subgraph External_Services [External Cloud Services]
+    subgraph Cloud-Services
         Firestore[(Firebase Firestore)]
         Gemini[Google Gemini 1.5 Pro/Flash]
         GitHub[GitHub API]
