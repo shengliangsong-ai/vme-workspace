@@ -324,6 +324,10 @@ async function startServer() {
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Planner Agent] Planning...\n` })}\n\n`);
       
       let seconds = 0;
+      let text0 = `[Planner Agent] Planning in progress... (0s elapsed)\n`;
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: text0 })}\n\n`);
+      if (typeof (res as any).flush === 'function') (res as any).flush();
+
       const progressInterval = setInterval(() => {
         seconds++;
         let text = `[Planner Agent] Planning in progress... (${seconds}s elapsed)\n`;
@@ -331,6 +335,7 @@ async function startServer() {
           text += `[☑️] Checkpoint reached: ${seconds} seconds of planning completed.\n`;
         }
         res.write(`data: ${JSON.stringify({ type: 'delta', text })}\n\n`);
+        if (typeof (res as any).flush === 'function') (res as any).flush();
       }, 1000);
 
       try {
