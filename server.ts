@@ -250,19 +250,21 @@ async function startServer() {
 
   // Job Execution Endpoint (SSE)
   app.get("/api/jobs/stream", async (req, res) => {
-    const { command } = req.query;
-    if (!command || typeof command !== 'string') {
-      return res.status(400).json({ error: "Command is required" });
-    }
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
-    }
-
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
+
+    const { command } = req.query;
+    if (!command || typeof command !== 'string') {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "Command is required" })}\n\n`);
+      return res.end();
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
+      return res.end();
+    }
 
     try {
       if (!genai) {
@@ -292,19 +294,21 @@ async function startServer() {
 
   // Job Orchestration Endpoint (SSE)
   app.get("/api/jobs/orchestrate", async (req, res) => {
-    const { command } = req.query;
-    if (!command || typeof command !== 'string') {
-      return res.status(400).json({ error: "Command is required" });
-    }
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
-    }
-
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
+
+    const { command } = req.query;
+    if (!command || typeof command !== 'string') {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "Command is required" })}\n\n`);
+      return res.end();
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
+      return res.end();
+    }
 
     try {
       if (!genai) {
@@ -366,19 +370,21 @@ async function startServer() {
   });
 
   app.get("/api/jobs/execute", async (req, res) => {
-    const { plan } = req.query;
-    if (!plan || typeof plan !== 'string') {
-      return res.status(400).json({ error: "Plan is required" });
-    }
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
-    }
-
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
+
+    const { plan } = req.query;
+    if (!plan || typeof plan !== 'string') {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "Plan is required" })}\n\n`);
+      return res.end();
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
+      return res.end();
+    }
 
     try {
       if (!genai) {
@@ -420,14 +426,15 @@ async function startServer() {
   });
 
   app.get("/api/jobs/self_improve", async (req, res) => {
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "GEMINI_API_KEY environment variable is missing" });
-    }
-
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
+
+    if (!process.env.GEMINI_API_KEY) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
+      return res.end();
+    }
 
     try {
       if (!genai) {
