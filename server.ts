@@ -310,6 +310,16 @@ async function startServer() {
       }
 
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Orchestrator] Starting multi-agent workflow for: ${command}\n\n` })}\n\n`);
+      
+      const jobSummary = `**Job Summary:**
+- **What will be done:** The Planner Agent will analyze the request, fetch context, and formulate a step-by-step execution plan. Upon approval, the Executor Agent will perform the steps.
+- **Expected duration (success):** 15 - 45 seconds for planning.
+- **Expected errors:** Gemini API rate limits or missing context errors.
+- **Worst-case timeout:** 300 seconds (5 minutes).
+- **How to abort:** Click the 'Cancel' or 'Delete' button in the Job Queue UI.
+
+`;
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: jobSummary })}\n\n`);
 
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Planner Agent] Planning...\n` })}\n\n`);
       
