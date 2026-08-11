@@ -4,6 +4,22 @@ The Virtual Me (VME) application is a lightweight full-stack Single Page Applica
 
 ## Core Architecture
 
+```mermaid
+graph TD
+    UI[React Client / SPA]
+    Context[React Context API]
+    Backend[Express Server]
+    SQLite[(Local SQLite DB)]
+    LocalStorage[(Local Storage)]
+    GitHub[(GitHub Sync Backup)]
+
+    UI <--> Context
+    Context --> |Fallback| LocalStorage
+    Context <--> |REST API| Backend
+    Backend <--> SQLite
+    Backend --> |Auth Sync| GitHub
+```
+
 ### 1. State Management & Persistence
 - **Context API**: The entire application state is managed via React Context (`AppContext.tsx`).
 - **Local SQLite Database**: The application uses a local SQLite database (`vme.db`) run via an Express backend to persist workspace data. This allows 100% local operation on your machine without relying on external cloud databases, which is ideal for enterprise environments with strict cloud access rules.
@@ -30,6 +46,20 @@ The Virtual Me (VME) application is a lightweight full-stack Single Page Applica
 ## Planned Architecture (Hackathon Migration)
 
 To support advanced agentic AI capabilities, we are planning a major architectural migration to a cloud-native Google Cloud stack.
+
+```mermaid
+graph TD
+    Client[React Client SPA]
+    CloudRun[Cloud Run - Agent Runtime]
+    Genkit[Google Genkit]
+    Gemini[Gemini 3.5 API]
+    Firestore[(Firebase Firestore)]
+    
+    Client -- SSE Stream --> CloudRun
+    CloudRun -- Orchestrates --> Genkit
+    Genkit <--> Gemini
+    CloudRun <--> |Memory Bank| Firestore
+```
 
 ### 1. Agentic Job Queue Execution (qsub)
 - **Current State (Mocked)**: The job queue execution is simulated using a `setInterval` loop in `AppContext.tsx`.
