@@ -261,6 +261,7 @@ async function startServer() {
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
 
     try {
@@ -302,6 +303,7 @@ async function startServer() {
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
 
     try {
@@ -375,6 +377,7 @@ async function startServer() {
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
 
     try {
@@ -423,6 +426,7 @@ async function startServer() {
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
 
     try {
