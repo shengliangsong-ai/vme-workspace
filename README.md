@@ -20,4 +20,4 @@ Virtual Me (vme) is an AI-powered personal developer workspace designed to strea
 - Octokit (GitHub API)
 - Firebase (Firestore)
 - Express
-- Google Genkit & Gemini SDK
+- Google Genkit & Gemini 3.5 SDK

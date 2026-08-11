@@ -6,13 +6,13 @@ import crypto from "crypto";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc, collection } from "firebase/firestore";
 import { genkit, z } from "genkit";
-import { googleAI, gemini15Flash, textEmbedding004 } from "@genkit-ai/googleai";
+import { googleAI, textEmbedding004 } from "@genkit-ai/googleai";
 import { GoogleGenAI } from "@google/genai";
 
 // Initialize Genkit
 const ai = genkit({
   plugins: [googleAI()],
-  model: gemini15Flash, // Default model
+  model: 'googleai/gemini-3.5-flash', // Default model
 });
 
 let genai: GoogleGenAI;
@@ -161,13 +161,13 @@ async function startServer() {
         // Ensure vectors are arrays of numbers
         if (Array.isArray(queryVector) && Array.isArray(vector)) {
            // genkit embed output can be { embedding: [] } or just [] depending on version, wait...
-           // Let's handle both
-           const qVec = queryVector[0]?.embedding || queryVector;
-           const iVec = vector[0]?.embedding || vector;
-           if (Array.isArray(qVec) && Array.isArray(iVec)) {
-             const score = cosineSimilarity(qVec, iVec);
-             results.push({ item, score });
-           }
+          // Let's handle both
+          const qVec = (queryVector as any)[0]?.embedding || queryVector;
+          const iVec = (vector as any)[0]?.embedding || vector;
+          if (Array.isArray(qVec) && Array.isArray(iVec)) {
+            const score = cosineSimilarity(qVec as number[], iVec as number[]);
+            results.push({ item, score });
+          }
         }
       }
 

@@ -36,7 +36,7 @@ graph TB
 
     subgraph Cloud-Services
         Firestore[(Firebase Firestore)]
-        Gemini[Google Gemini 1.5 Pro/Flash]
+        Gemini[Google Gemini 3.5 Pro/Flash]
         GitHub[GitHub API]
     end
 
@@ -181,7 +181,7 @@ flowchart TD
     Workspaces --> Assemble
     Issues --> Assemble
     
-    Assemble --> GeminiModel((Gemini 1.5 Pro))
+    Assemble --> GeminiModel((Gemini 3.5 Pro))
     GeminiModel --> FinalOutput[Agent Response]
 ```
 
