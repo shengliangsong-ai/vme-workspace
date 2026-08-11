@@ -20,6 +20,7 @@ interface AppContextType extends AppState {
   cancelJob: (id: string) => void;
   reorderJob: (id: string, newIndex: number) => void;
   deleteJob: (id: string) => void;
+  clearJobs: () => void;
   approveJob: (id: string) => void;
   
   addStandup: (standup: Omit<Standup, 'id' | 'createdAt'>) => void;
@@ -247,6 +248,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, jobs: s.jobs.filter(j => j.id !== id) }));
   };
 
+  const clearJobs = () => {
+    setState(s => ({ ...s, jobs: s.jobs.filter(j => j.status === 'running' || j.status === 'awaiting_approval' || j.status === 'queued') }));
+  };
+
   const approveJob = (id: string) => {
     setState(s => ({
       ...s,
@@ -459,6 +464,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       cancelJob,
       reorderJob,
       deleteJob,
+      clearJobs,
       approveJob,
       addStandup,
       updateStandup,

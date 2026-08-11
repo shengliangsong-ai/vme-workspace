@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext';
 import { Play, X, Trash2, ArrowUp, ArrowDown, Clock, Activity, CheckCircle2, XCircle } from 'lucide-react';
 
 export function QueueManager() {
-  const { jobs, submitJob, cancelJob, reorderJob, deleteJob, approveJob } = useAppContext();
+  const { jobs, submitJob, cancelJob, reorderJob, deleteJob, clearJobs, approveJob } = useAppContext();
   const [command, setCommand] = useState('');
   const [timeoutMs, setTimeoutMs] = useState(5000);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -107,6 +107,19 @@ export function QueueManager() {
                 >
                   <Activity size={14} className="mr-1" />
                   Run Self-Improvement
+                </button>
+                <button
+                  onClick={() => {
+                    clearJobs();
+                    if (selectedJob && !['running', 'awaiting_approval', 'queued'].includes(selectedJob.status)) {
+                      setSelectedJobId(null);
+                    }
+                  }}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center bg-red-50 px-2 py-1 rounded"
+                  title="Clear all completed, cancelled, or failed jobs"
+                >
+                  <Trash2 size={14} className="mr-1" />
+                  Clear Old Jobs
                 </button>
               </div>
             </div>
