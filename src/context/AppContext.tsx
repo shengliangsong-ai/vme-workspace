@@ -259,7 +259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearJobs = () => {
-    setState(s => ({ ...s, jobs: s.jobs.filter(j => j.status === 'running' || j.status === 'awaiting_approval' || j.status === 'queued') }));
+    setState(s => ({ ...s, jobs: s.jobs.filter(j => j.status === 'running' || j.status === 'awaiting_approval') }));
   };
 
   const approveJob = (id: string) => {

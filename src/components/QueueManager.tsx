@@ -111,12 +111,12 @@ export function QueueManager() {
                 <button
                   onClick={() => {
                     clearJobs();
-                    if (selectedJob && !['running', 'awaiting_approval', 'queued'].includes(selectedJob.status)) {
+                    if (selectedJob && !['running', 'awaiting_approval'].includes(selectedJob.status)) {
                       setSelectedJobId(null);
                     }
                   }}
                   className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center bg-red-50 px-2 py-1 rounded"
-                  title="Clear all completed, cancelled, or failed jobs"
+                  title="Clear all queued, completed, cancelled, or failed jobs"
                 >
                   <Trash2 size={14} className="mr-1" />
                   Clear Old Jobs
@@ -143,6 +143,8 @@ export function QueueManager() {
                         <div className="font-mono text-sm text-[#1a1a1a] truncate">{job.command}</div>
                         <div className="text-xs text-[#999999] mt-1">
                           Timeout: {job.timeoutMs}ms | Status: {job.status}
+                          {job.startedAt && ` | Started: ${new Date(job.startedAt).toLocaleTimeString()}`}
+                          {job.completedAt && ` | Finished: ${new Date(job.completedAt).toLocaleTimeString()}`}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">

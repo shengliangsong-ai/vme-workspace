@@ -1,12 +1,15 @@
 {
   "workspaces/default": {
-    "issues": [],
-    "skills": [],
-    "settings": {},
-    "activeIssueId": null,
-    "jobs": [],
-    "standups": [],
-    "blogPosts": [],
-    "sessionReports": []
+    "workspaces/default": {
+      "jobs": [
+        {
+          "id": "test-completed",
+          "command": "test",
+          "status": "completed",
+          "createdAt": 12345,
+          "log": "test"
+        }
+      ]
+    }
   }
 }
