@@ -207,7 +207,22 @@ export function QueueManager() {
           <div className="p-4 border-b border-[#eeeeee] flex justify-between items-center bg-white">
             <h3 className="text-xs font-bold uppercase tracking-widest text-[#999999]">Run Logs</h3>
             {selectedJob && (
-              <span className="text-xs font-mono text-[#666666]">{selectedJob.status}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono text-[#666666]">{selectedJob.status}</span>
+                {!['queued', 'running', 'awaiting_approval'].includes(selectedJob.status) && (
+                  <button
+                    onClick={() => {
+                      deleteJob(selectedJob.id);
+                      setSelectedJobId(null);
+                    }}
+                    className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center bg-red-50 px-2 py-1 rounded transition-colors"
+                    title="Delete Job"
+                  >
+                    <Trash2 size={14} className="mr-1" />
+                    Delete
+                  </button>
+                )}
+              </div>
             )}
           </div>
           <div className="flex-1 overflow-y-auto p-4 font-mono text-xs whitespace-pre-wrap">
