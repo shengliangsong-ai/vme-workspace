@@ -1,5 +1,28 @@
 {
   "workspaces/default": {
+    "issues": [],
+    "skills": [],
+    "settings": {
+      "githubToken": "",
+      "githubRepo": "shengliangsong-ai/vme",
+      "claudeApiKey": ""
+    },
+    "activeIssueId": null,
+    "jobs": [
+      {
+        "id": "7a48d470-afa4-4d26-83bc-5f5db07bee82",
+        "command": "orchestrate Review the authentication flow and suggest improvements",
+        "timeoutMs": 5000,
+        "status": "awaiting_approval",
+        "createdAt": 1786596711119,
+        "log": "> orchestrate Review the authentication flow and suggest improvements\nStarting execution...\n[Orchestrator] Starting multi-agent workflow for: Review the authentication flow and suggest improvements\n\n**Job Summary:**\n- **What will be done:** (MOCK MODE) The Planner Agent will analyze the request, fetch context, and formulate a step-by-step execution plan. Upon approval, the Executor Agent will perform the steps.\n- **Expected duration (success):** 2 seconds for planning.\n[Planner Agent] Planning...\n\n[Planner Agent] Plan generated:\n**Step 1:** Analyze the current SQLite schema.\n**Step 2:** Propose new tables for issues and skills.\n**Step 3:** Generate the schema definition.\n\n\n\n\n[System] Awaiting your approval to proceed.",
+        "startedAt": 1786596711130,
+        "plan": "**Step 1:** Analyze the current SQLite schema.\n**Step 2:** Propose new tables for issues and skills.\n**Step 3:** Generate the schema definition.\n"
+      }
+    ],
+    "standups": [],
+    "blogPosts": [],
+    "sessionReports": [],
     "workspaces/default": {
       "jobs": [
         {

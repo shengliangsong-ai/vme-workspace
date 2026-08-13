@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo, Calendar, BookOpen } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo, Calendar, BookOpen, Terminal } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 interface SidebarProps {
@@ -56,6 +56,12 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
       </nav>
 
       <div className="p-4 border-t border-[#eeeeee] flex flex-col gap-3">
+        <button 
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-terminal'))}
+          className="text-xs text-center text-[#999999] hover:text-[#1a1a1a] mb-1 flex items-center justify-center gap-1 transition-colors"
+        >
+          <Terminal size={14} /> Cmd/Ctrl + ` to toggle CLI
+        </button>
         <button
           onClick={syncToGitHub}
           disabled={isSyncing || !settings.githubToken}

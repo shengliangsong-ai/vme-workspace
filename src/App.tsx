@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard';
 import { QueueManager } from './components/QueueManager';
 import { StandupManager } from './components/StandupManager';
 import { BlogManager } from './components/BlogManager';
+import { CommandTerminal } from './components/CommandTerminal';
 
 function MainLayout() {
   const [currentTab, setCurrentTab] = useState('dashboard');
@@ -24,6 +25,7 @@ function MainLayout() {
         {currentTab === 'settings' && <SettingsView />}
         {currentTab === 'queue' && <QueueManager />}
       </main>
+      <CommandTerminal currentTab={currentTab} setCurrentTab={setCurrentTab} />
     </div>
   );
 }
