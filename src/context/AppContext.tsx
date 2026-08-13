@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { AppState, Issue, Skill, Settings, Job, Standup, BlogPost, SessionReport, WorkflowStep, DEFAULT_BUG_STEPS } from '../types';
+import { AppState, Issue, Skill, Settings, Job, Standup, BlogPost, SessionReport, WorkflowStep, DEFAULT_BUG_STEPS, DebugEvent } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { GitHubService } from '../lib/github';
 
@@ -33,6 +33,10 @@ interface AppContextType extends AppState {
   
   addSessionReport: (report: Omit<SessionReport, 'id' | 'createdAt'>) => void;
   
+  addDebugEvent: (event: Omit<DebugEvent, 'id' | 'timestamp'>) => void;
+  updateApiMode: (mode: 'mock' | 'live' | 'unknown') => void;
+  addTokenUsage: (tokens: number) => void;
+  
   isSyncing: boolean;
 }
 
@@ -51,6 +55,9 @@ const initialState: AppState = {
   standups: [],
   blogPosts: [],
   sessionReports: [],
+  debugEvents: [],
+  apiMode: 'unknown',
+  totalTokensUsed: 0,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -405,6 +412,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, sessionReports: [newReport, ...s.sessionReports] }));
   };
 
+  const addDebugEvent = (event: Omit<DebugEvent, 'id' | 'timestamp'>) => {
+    const newEvent: DebugEvent = { ...event, id: uuidv4(), timestamp: Date.now() };
+    setState(s => ({ ...s, debugEvents: [...(s.debugEvents || []), newEvent] }));
+  };
+
+  const updateApiMode = (mode: 'mock' | 'live' | 'unknown') => {
+    setState(s => ({ ...s, apiMode: mode }));
+  };
+
+  const addTokenUsage = (tokens: number) => {
+    setState(s => ({ ...s, totalTokensUsed: (s.totalTokensUsed || 0) + tokens }));
+  };
+
   const syncToGitHub = async () => {
     if (!state.settings.githubToken || !state.settings.githubRepo) return;
     setIsSyncing(true);
@@ -416,7 +436,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         jobs: state.jobs,
         standups: state.standups,
         blogPosts: state.blogPosts,
-        sessionReports: state.sessionReports
+        sessionReports: state.sessionReports,
+        debugEvents: state.debugEvents,
+        apiMode: state.apiMode,
+        totalTokensUsed: state.totalTokensUsed
       });
       alert('Successfully synced to GitHub!');
     } catch (e: any) {
@@ -483,6 +506,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateBlogPost,
       deleteBlogPost,
       addSessionReport,
+      addDebugEvent,
+      updateApiMode,
+      addTokenUsage,
       isSyncing
     }}>
       {isLoaded ? children : <div className="h-screen w-screen flex items-center justify-center text-[#999999]">Loading workspace...</div>}

@@ -82,6 +82,14 @@ export interface Settings {
   claudeApiKey: string;
 }
 
+export interface DebugEvent {
+  id: string;
+  timestamp: number;
+  type: 'cli' | 'ai_prompt' | 'system' | 'token_usage';
+  message: string;
+  meta?: any;
+}
+
 export interface AppState {
   issues: Issue[];
   skills: Skill[];
@@ -91,6 +99,9 @@ export interface AppState {
   standups: Standup[];
   blogPosts: BlogPost[];
   sessionReports: SessionReport[];
+  debugEvents: DebugEvent[];
+  apiMode: 'mock' | 'live' | 'unknown';
+  totalTokensUsed: number;
 }
 
 export const DEFAULT_BUG_STEPS = [

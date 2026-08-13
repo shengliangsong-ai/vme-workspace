@@ -11,14 +11,17 @@ export function CommandTerminal({ currentTab, setCurrentTab }: { currentTab: str
   ]);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const context = useAppContext();
+  const state = (context as any).state || context;
   const { 
-    state, submitJob, deleteJob, clearJobs, approveJob, 
+    submitJob, cancelJob, deleteJob, clearJobs, approveJob, 
     createIssue, deleteIssue, setActiveIssue,
     addSkill, deleteSkill,
     addStandup, deleteStandup,
     addBlogPost, deleteBlogPost,
-    updateSettings
-  } = useAppContext();
+    updateSettings,
+    addDebugEvent
+  } = context;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,6 +76,11 @@ export function CommandTerminal({ currentTab, setCurrentTab }: { currentTab: str
     print(`> ${input}`, 'user');
     const args = parseArgs(input.trim());
     const cmd = args[0].toLowerCase();
+    
+    state.debugEvents && addDebugEvent({
+      type: 'cli',
+      message: `Executed: ${input}`
+    });
     
     try {
       executeCommand(cmd, args.slice(1));
