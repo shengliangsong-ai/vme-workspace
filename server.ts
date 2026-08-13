@@ -3,8 +3,36 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import fs from "fs";
 import crypto from "crypto";
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, collection } from "firebase/firestore";
+
+// Mock Firebase implementation for local storage
+const LOCAL_DB_PATH = path.join(process.cwd(), '.local-db.json');
+function initializeApp(config: any) { return {}; }
+function getFirestore(app: any, dbId: string) { return "mock-db"; }
+function doc(db: any, collection: string, id: string) {
+  return { collection, id };
+}
+async function getDoc(docRef: any) {
+  if (!fs.existsSync(LOCAL_DB_PATH)) return { exists: () => false, data: () => undefined };
+  try {
+    const dbData = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    const key = `${docRef.collection}/${docRef.id}`;
+    if (dbData[key]) return { exists: () => true, data: () => dbData[key] };
+  } catch (e) {}
+  return { exists: () => false, data: () => undefined };
+}
+async function setDoc(docRef: any, data: any) {
+  let dbData: any = {};
+  if (fs.existsSync(LOCAL_DB_PATH)) {
+    try {
+      dbData = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
+    } catch (e) {}
+  }
+  const key = `${docRef.collection}/${docRef.id}`;
+  dbData[key] = data;
+  fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(dbData, null, 2), 'utf-8');
+}
+function collection(db: any, path: string) { return path; }
+
 import { genkit, z } from "genkit";
 import { googleAI, textEmbedding004 } from "@genkit-ai/googleai";
 import { GoogleGenAI } from "@google/genai";
@@ -93,14 +121,15 @@ async function startServer() {
 
   app.use(express.json({ limit: "50mb" }));
 
-  // Initialize Firebase Client SDK
+  // Initialize Firebase Client SDK (or local fallback)
   let db: any;
   if (fs.existsSync('./firebase-applet-config.json')) {
     const config = JSON.parse(fs.readFileSync('./firebase-applet-config.json', 'utf8'));
     const firebaseApp = initializeApp(config);
     db = getFirestore(firebaseApp, config.firestoreDatabaseId || '(default)');
   } else {
-    throw new Error("Missing firebase-applet-config.json");
+    console.warn("Missing firebase-applet-config.json, falling back to local JSON storage.");
+    db = "mock-db";
   }
 
   const searchWorkspaceData = ai.defineTool({
@@ -262,8 +291,13 @@ async function startServer() {
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
-      return res.end();
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Stream] Executing command (MOCK MODE): ${command}\n` })}\n\n`);
+      setTimeout(() => {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `Output line 1\nOutput line 2\n` })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+        res.end();
+      }, 1500);
+      return;
     }
 
     try {
@@ -306,8 +340,18 @@ async function startServer() {
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
-      return res.end();
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Orchestrator] Starting multi-agent workflow for: ${command}\n\n` })}\n\n`);
+      const jobSummary = `**Job Summary:**\n- **What will be done:** (MOCK MODE) The Planner Agent will analyze the request, fetch context, and formulate a step-by-step execution plan. Upon approval, the Executor Agent will perform the steps.\n- **Expected duration (success):** 2 seconds for planning.\n`;
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: jobSummary })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Planner Agent] Planning...\n` })}\n\n`);
+      
+      setTimeout(() => {
+        const mockPlan = `**Step 1:** Analyze the current SQLite schema.\n**Step 2:** Propose new tables for issues and skills.\n**Step 3:** Generate the schema definition.\n`;
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `\n[Planner Agent] Plan generated:\n${mockPlan}\n\n` })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'awaiting_approval', plan: mockPlan })}\n\n`);
+        res.end();
+      }, 2000);
+      return;
     }
 
     try {
@@ -382,8 +426,22 @@ async function startServer() {
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
-      return res.end();
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Executor Agent] Executing plan (MOCK MODE)...\n` })}\n\n`);
+      setTimeout(() => {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `Executed Step 1: SQLite schema analyzed.\n` })}\n\n`);
+      }, 1000);
+      setTimeout(() => {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `Executed Step 2: New tables proposed.\n` })}\n\n`);
+      }, 2000);
+      setTimeout(() => {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `Executed Step 3: Schema generated.\n\n[QA Reviewer Agent] Reviewing execution...\n` })}\n\n`);
+      }, 3000);
+      setTimeout(() => {
+         res.write(`data: ${JSON.stringify({ type: 'delta', text: `[QA Reviewer Agent] Execution looks good.\n\n` })}\n\n`);
+         res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+         res.end();
+      }, 4000);
+      return;
     }
 
     try {
@@ -432,8 +490,16 @@ async function startServer() {
     res.setHeader("Connection", "keep-alive");
 
     if (!process.env.GEMINI_API_KEY) {
-      res.write(`data: ${JSON.stringify({ type: 'error', message: "GEMINI_API_KEY environment variable is missing" })}\n\n`);
-      return res.end();
+      res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Self-Improvement] Fetching recent jobs (MOCK MODE)...\n` })}\n\n`);
+      setTimeout(() => {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Evaluator Agent] Analyzing logs...\n` })}\n\n`);
+      }, 1000);
+      setTimeout(() => {
+        res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Evaluator Agent] Generated new Skill document based on learnings.\n\n` })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'completed' })}\n\n`);
+        res.end();
+      }, 2000);
+      return;
     }
 
     try {

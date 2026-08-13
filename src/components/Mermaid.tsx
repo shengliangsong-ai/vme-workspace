@@ -3,7 +3,7 @@ import mermaid from 'mermaid';
 
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'default',
+  theme: 'neutral',
   securityLevel: 'loose',
 });
 
@@ -22,5 +22,5 @@ export const Mermaid = ({ chart }: { chart: string }) => {
     }
   }, [chart]);
 
-  return <div ref={ref} className="mermaid flex justify-center my-6" />;
+  return <div ref={ref} className="mermaid flex justify-center my-6 bg-white p-4 rounded-xl" />;
 };

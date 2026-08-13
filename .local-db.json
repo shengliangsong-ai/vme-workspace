@@ -1,0 +1,12 @@
+{
+  "workspaces/default": {
+    "issues": [],
+    "skills": [],
+    "settings": {},
+    "activeIssueId": null,
+    "jobs": [],
+    "standups": [],
+    "blogPosts": [],
+    "sessionReports": []
+  }
+}
