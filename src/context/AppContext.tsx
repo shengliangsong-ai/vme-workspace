@@ -123,6 +123,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }).catch(e => console.warn("Failed to sync state to backend DB", e));
   }, [state, isLoaded]);
 
+  const eventSourceRef = useRef<EventSource | null>(null);
+
   // Real Job Execution Loop
   useEffect(() => {
     const queuedJob = state.jobs.find(j => j.status === 'queued');
@@ -151,6 +153,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     const eventSource = new EventSource(endpoint);
+    eventSourceRef.current = eventSource;
 
     eventSource.onmessage = (event) => {
       try {
@@ -170,6 +173,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               : j)
           }));
           eventSource.close();
+          eventSourceRef.current = null;
           processingRef.current = false;
         } else if (data.type === 'awaiting_approval') {
           setState(s => ({
@@ -179,6 +183,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               : j)
           }));
           eventSource.close();
+          eventSourceRef.current = null;
           processingRef.current = false;
         } else if (data.type === 'error') {
           setState(s => ({
@@ -188,6 +193,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               : j)
           }));
           eventSource.close();
+          eventSourceRef.current = null;
           processingRef.current = false;
         }
       } catch (e) {
@@ -203,14 +209,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           : j)
       }));
       eventSource.close();
-      processingRef.current = false;
-    };
-
-    return () => {
-      eventSource.close();
+      eventSourceRef.current = null;
       processingRef.current = false;
     };
   }, [state.jobs]);
+
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
 
   const submitJob = (command: string, timeoutMs: number) => {
     const newJob: Job = {

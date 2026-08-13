@@ -94,7 +94,7 @@ export function QueueManager() {
               <div className="flex gap-2">
                 <button
                   onClick={() => {
-                    submitJob('orchestrate Review our current architecture and propose a new SQLite schema design for issues and skills.', 60000);
+                    submitJob('orchestrate --mock Review our current architecture and propose a new SQLite schema design for issues and skills.', 60000);
                   }}
                   className="text-xs font-semibold text-purple-600 hover:text-purple-700 flex items-center bg-purple-50 px-2 py-1 rounded"
                 >
