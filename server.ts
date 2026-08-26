@@ -339,7 +339,7 @@ async function startServer() {
       return res.end();
     }
 
-    if (!process.env.GEMINI_API_KEY || command.includes('--mock')) {
+    if (!process.env.GEMINI_API_KEY) {
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Orchestrator] Starting multi-agent workflow for: ${command}\n\n` })}\n\n`);
       const jobSummary = `**Job Summary:**\n- **What will be done:** (MOCK MODE) The Planner Agent will analyze the request, fetch context, and formulate a step-by-step execution plan. Upon approval, the Executor Agent will perform the steps.\n- **Expected duration (success):** 2 seconds for planning.\n`;
       res.write(`data: ${JSON.stringify({ type: 'delta', text: jobSummary })}\n\n`);
@@ -425,7 +425,7 @@ async function startServer() {
       return res.end();
     }
 
-    if (!process.env.GEMINI_API_KEY || plan.includes('Analyze the current SQLite schema')) {
+    if (!process.env.GEMINI_API_KEY) {
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Executor Agent] Executing plan (MOCK MODE)...\n` })}\n\n`);
       setTimeout(() => {
         res.write(`data: ${JSON.stringify({ type: 'delta', text: `Executed Step 1: SQLite schema analyzed.\n` })}\n\n`);
@@ -489,8 +489,7 @@ async function startServer() {
     res.setHeader("X-Accel-Buffering", "no");
     res.setHeader("Connection", "keep-alive");
 
-    // Force mock mode for the demo since users likely just want to see the UI interaction
-    if (!process.env.GEMINI_API_KEY || true) {
+    if (!process.env.GEMINI_API_KEY) {
       res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Self-Improvement] Fetching recent jobs (MOCK MODE)...\n` })}\n\n`);
       setTimeout(() => {
         res.write(`data: ${JSON.stringify({ type: 'delta', text: `[Evaluator Agent] Analyzing logs...\n` })}\n\n`);
