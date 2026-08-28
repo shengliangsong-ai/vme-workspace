@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { BookOpen, Plus, Trash2, Save, Search, Tag, Edit3, Code, LayoutTemplate } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Save, Search, Tag, Edit3, Code, LayoutTemplate, FileText } from 'lucide-react';
 import { BlogPost } from '../types';
 import Markdown from 'react-markdown';
 import { Mermaid } from './Mermaid';
@@ -9,14 +9,19 @@ import { Mermaid } from './Mermaid';
 import ARCHITECTURE_DOC from "../../ARCHITECTURE.md?raw";
 // @ts-ignore
 import WHITE_PAPER_DOC from "../../WHITE_PAPER.md?raw";
-
+// @ts-ignore
+import README_DOC from "../../README.md?raw";
 
 export function BlogManager() {
   const { blogPosts, addBlogPost, updateBlogPost, deleteBlogPost } = useAppContext();
+  
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState({ title: '', content: '', labels: '' });
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [viewModes, setViewModes] = useState<Record<string, 'rendered' | 'raw'>>({});
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   const hasSeeded = useRef(false);
 
@@ -54,30 +59,57 @@ export function BlogManager() {
       });
     }
 
-  }, [blogPosts, addBlogPost, deleteBlogPost]);
-
-  const [form, setForm] = useState({ title: '', content: '', labels: '' });
+    const duplicateReadme = blogPosts.filter(p => p.title === 'Welcome Judges: Virtual Me Overview (4-min read)');
+    if (duplicateReadme.length > 1) {
+      for (let i = 1; i < duplicateReadme.length; i++) {
+        deleteBlogPost(duplicateReadme[i].id);
+      }
+    } else if (duplicateReadme.length === 0) {
+      addBlogPost({
+        title: 'Welcome Judges: Virtual Me Overview (4-min read)',
+        content: README_DOC,
+        labels: ['welcome', 'readme', 'hackathon']
+      });
+    } else if (duplicateReadme[0].content !== README_DOC) {
+      updateBlogPost(duplicateReadme[0].id, {
+        title: duplicateReadme[0].title,
+        content: README_DOC,
+        labels: duplicateReadme[0].labels
+      });
+    }
+  }, [blogPosts, addBlogPost, deleteBlogPost, updateBlogPost]);
 
   const handleSave = () => {
-    const postData = {
-      title: form.title,
-      content: form.content,
-      labels: form.labels.split(',').map(l => l.trim()).filter(Boolean)
-    };
-
+    if (!form.title.trim()) return;
+    const labels = form.labels.split(',').map(l => l.trim()).filter(l => l);
+    
     if (editingId) {
-      updateBlogPost(editingId, postData);
-      setEditingId(null);
+      updateBlogPost(editingId, {
+        title: form.title,
+        content: form.content,
+        labels
+      });
     } else {
-      addBlogPost(postData);
-      setIsCreating(false);
+      addBlogPost({
+        title: form.title,
+        content: form.content,
+        labels
+      });
     }
+    
+    setIsCreating(false);
+    setEditingId(null);
     setForm({ title: '', content: '', labels: '' });
   };
 
-  const handleEdit = (p: BlogPost) => {
-    setForm({ title: p.title, content: p.content, labels: p.labels.join(', ') });
-    setEditingId(p.id);
+  const handleEdit = (post: BlogPost) => {
+    setForm({
+      title: post.title,
+      content: post.content,
+      labels: post.labels.join(', ')
+    });
+    setEditingId(post.id);
+    setIsCreating(false);
   };
 
   const handleCancel = () => {
@@ -103,16 +135,27 @@ export function BlogManager() {
       .sort((a, b) => b.createdAt - a.createdAt);
   }, [blogPosts, searchQuery]);
 
+  // Auto-select first post if none selected
+  useEffect(() => {
+    if (!selectedPostId && filteredPosts.length > 0 && !isCreating && !editingId) {
+      setSelectedPostId(filteredPosts[0].id);
+    }
+  }, [filteredPosts, selectedPostId, isCreating, editingId]);
+
+  const selectedPost = useMemo(() => {
+    return blogPosts.find(p => p.id === selectedPostId) || null;
+  }, [blogPosts, selectedPostId]);
+
   return (
-    <div className="max-w-5xl mx-auto p-6 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-7xl mx-auto p-6 h-full flex flex-col">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-semibold text-[#1a1a1a]">Blog & Lessons Learned</h2>
           <p className="text-[#666666] mt-1">Document insights from Claude sessions.</p>
         </div>
         {!isCreating && !editingId && (
           <button
-            onClick={() => setIsCreating(true)}
+            onClick={() => { setIsCreating(true); setSelectedPostId(null); }}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm"
           >
             <Plus size={16} /> New Post
@@ -120,147 +163,191 @@ export function BlogManager() {
         )}
       </div>
 
-      {!isCreating && !editingId && (
-        <div className="mb-6 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#999999]" size={16} />
-          <input
-            type="text"
-            placeholder="Search by keyword, title, or label..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-[#eeeeee] rounded-full pl-10 pr-4 py-2.5 text-sm text-[#1a1a1a] focus:outline-none focus:border-[#ccc] shadow-sm"
-          />
-        </div>
-      )}
-
-      {(isCreating || editingId) && (
-        <div className="bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm mb-6">
-          <h3 className="text-sm font-semibold mb-4 text-[#1a1a1a]">
-            {editingId ? 'Edit Post' : 'Create New Post'}
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Title</label>
+      <div className="flex-1 flex overflow-hidden gap-6">
+        {/* Left Sidebar - Index */}
+        {!isCreating && !editingId && (
+          <div className="w-1/3 flex flex-col border border-[#eeeeee] rounded-xl bg-white shadow-sm overflow-hidden shrink-0">
+            <div className="p-4 border-b border-[#eeeeee] relative">
+              <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-[#999999]" size={16} />
               <input
                 type="text"
-                value={form.title}
-                onChange={e => setForm({ ...form, title: e.target.value })}
-                className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-2 text-[#1a1a1a] focus:outline-none focus:border-[#ccc]"
-                placeholder="e.g. Setting up Vite with Tailwind"
+                placeholder="Search index..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-full pl-10 pr-4 py-2 text-sm text-[#1a1a1a] focus:outline-none focus:border-[#ccc] transition-colors"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Labels (comma separated)</label>
-              <input
-                type="text"
-                value={form.labels}
-                onChange={e => setForm({ ...form, labels: e.target.value })}
-                className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-2 text-[#1a1a1a] focus:outline-none focus:border-[#ccc]"
-                placeholder="e.g. react, setup, errors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Content / Lessons Learned</label>
-              <textarea
-                value={form.content}
-                onChange={e => setForm({ ...form, content: e.target.value })}
-                rows={8}
-                className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-2 text-[#1a1a1a] focus:outline-none focus:border-[#ccc] font-mono text-sm"
-                placeholder="Write your insights here..."
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 mt-6">
-            <button onClick={handleCancel} className="px-5 py-2.5 text-xs font-semibold text-[#666666] hover:text-[#1a1a1a] transition-colors">
-              Cancel
-            </button>
-            <button onClick={handleSave} disabled={!form.title.trim()} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-full text-xs font-semibold transition-colors shadow-sm">
-              <Save size={16} /> Save Post
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-y-auto space-y-4">
-        {filteredPosts.length === 0 && !isCreating ? (
-          <div className="text-center text-[#999999] py-12 border-2 border-dashed border-[#eeeeee] rounded-xl">
-            <BookOpen className="mx-auto mb-3 opacity-20" size={48} />
-            <p>No blog posts found.</p>
-          </div>
-        ) : (
-          filteredPosts.map(p => (
-            <div key={p.id} className="bg-white border border-[#eeeeee] p-6 rounded-xl shadow-sm transition-colors">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h4 className="font-semibold text-xl text-[#1a1a1a]">{p.title}</h4>
-                  <p className="text-xs text-[#888888] mt-1">{new Date(p.createdAt).toLocaleString()}</p>
+            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+              {filteredPosts.length === 0 ? (
+                <div className="text-center text-[#999999] py-12 flex flex-col items-center">
+                  <FileText className="opacity-20 mb-3" size={32} />
+                  <p className="text-sm">No posts found.</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => toggleViewMode(p.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#f0f0f0] text-[#666666] hover:bg-[#e0e0e0] hover:text-[#1a1a1a] rounded-md transition-colors"
+              ) : (
+                filteredPosts.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedPostId(p.id)}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                      selectedPostId === p.id 
+                        ? 'bg-blue-50 border border-blue-200' 
+                        : 'hover:bg-[#f5f5f5] border border-transparent'
+                    }`}
                   >
-                    {viewModes[p.id] === 'raw' ? (
-                      <><LayoutTemplate size={14} /> Rendered View</>
-                    ) : (
-                      <><Code size={14} /> Raw Markdown</>
-                    )}
+                    <h4 className={`text-sm font-semibold truncate ${selectedPostId === p.id ? 'text-blue-800' : 'text-[#1a1a1a]'}`}>
+                      {p.title}
+                    </h4>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className={`text-xs ${selectedPostId === p.id ? 'text-blue-600' : 'text-[#888888]'} truncate`}>
+                        {new Date(p.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </p>
+                      {p.labels.length > 0 && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${selectedPostId === p.id ? 'bg-blue-100 text-blue-700' : 'bg-[#e0e0e0] text-[#666]'}`}>
+                          {p.labels.length} tag{p.labels.length !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
                   </button>
-                  <button 
-                    onClick={() => handleEdit(p)} 
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
-                  >
-                    <Edit3 size={14} /> Edit
-                  </button>
-                  <button 
-                    onClick={() => deleteBlogPost(p.id)} 
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors"
-                    title="Delete Post"
-                  >
-                    <Trash2 size={14} /> Delete
-                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Right Content Area */}
+        <div className={`${isCreating || editingId ? 'w-full max-w-4xl mx-auto' : 'w-2/3'} flex flex-col bg-white border border-[#eeeeee] rounded-xl shadow-sm overflow-hidden`}>
+          {(isCreating || editingId) ? (
+            <div className="p-8 overflow-y-auto">
+              <h3 className="text-lg font-bold mb-6 text-[#1a1a1a]">
+                {editingId ? 'Edit Post' : 'Create New Post'}
+              </h3>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Title</label>
+                  <input
+                    type="text"
+                    value={form.title}
+                    onChange={e => setForm({ ...form, title: e.target.value })}
+                    className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-2 text-[#1a1a1a] focus:outline-none focus:border-[#ccc]"
+                    placeholder="e.g. Setting up Vite with Tailwind"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Labels (comma separated)</label>
+                  <input
+                    type="text"
+                    value={form.labels}
+                    onChange={e => setForm({ ...form, labels: e.target.value })}
+                    className="w-full bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-2 text-[#1a1a1a] focus:outline-none focus:border-[#ccc]"
+                    placeholder="e.g. react, setup, errors"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col min-h-[400px]">
+                  <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">Content / Lessons Learned</label>
+                  <textarea
+                    value={form.content}
+                    onChange={e => setForm({ ...form, content: e.target.value })}
+                    className="w-full flex-1 bg-[#f9f9f9] border border-[#eeeeee] rounded-md px-3 py-3 text-[#1a1a1a] focus:outline-none focus:border-[#ccc] font-mono text-sm"
+                    placeholder="Write your insights here..."
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-8">
+                <button onClick={handleCancel} className="px-5 py-2.5 text-sm font-semibold text-[#666666] hover:text-[#1a1a1a] transition-colors">
+                  Cancel
+                </button>
+                <button onClick={handleSave} disabled={!form.title.trim()} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-sm">
+                  <Save size={16} /> Save Post
+                </button>
+              </div>
+            </div>
+          ) : selectedPost ? (
+            <div className="flex flex-col h-full overflow-hidden">
+              <div className="p-8 pb-6 border-b border-[#eeeeee] shrink-0">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-bold text-3xl text-[#1a1a1a] mb-3">{selectedPost.title}</h3>
+                    <div className="flex items-center gap-4 text-sm text-[#888888]">
+                      <span>{new Date(selectedPost.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })}</span>
+                      {selectedPost.labels.length > 0 && (
+                        <div className="flex gap-2">
+                          {selectedPost.labels.map((l, i) => (
+                            <span key={i} className="flex items-center gap-1 bg-[#f0f0f0] px-2 py-0.5 rounded-md text-[#666] text-xs font-medium">
+                              <Tag size={12} /> {l}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button 
+                      onClick={() => toggleViewMode(selectedPost.id)}
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-[#f5f5f5] text-[#444] hover:bg-[#e0e0e0] hover:text-[#1a1a1a] rounded-lg transition-colors"
+                    >
+                      {viewModes[selectedPost.id] === 'raw' ? (
+                        <><LayoutTemplate size={14} /> Rendered</>
+                      ) : (
+                        <><Code size={14} /> Raw</>
+                      )}
+                    </button>
+                    <button 
+                      onClick={() => handleEdit(selectedPost)} 
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                    >
+                      <Edit3 size={14} /> Edit
+                    </button>
+                    <button 
+                      onClick={() => {
+                        deleteBlogPost(selectedPost.id);
+                        setSelectedPostId(null);
+                      }} 
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                      title="Delete Post"
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
                 </div>
               </div>
               
-              {p.labels.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {p.labels.map((l, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#f0f0f0] text-xs font-medium text-[#666666]">
-                      <Tag size={12} /> {l}
-                    </span>
-                  ))}
-                </div>
-              )}
-              
-              {viewModes[p.id] === 'raw' ? (
-                <div className="text-sm text-[#333333] whitespace-pre-wrap font-mono bg-[#f9f9f9] p-4 rounded-lg border border-[#eeeeee]">
-                  {p.content}
-                </div>
-              ) : (
-                <div className="prose prose-sm max-w-none text-[#333333]">
-                  <Markdown
-                    components={{
-                      code(props) {
-                        const {children, className, node, ...rest} = props
-                        const match = /language-(\w+)/.exec(className || '')
-                        if (match && match[1] === 'mermaid') {
-                          return <Mermaid chart={String(children).replace(/\n$/, '')} />
+              <div className="flex-1 overflow-y-auto p-8">
+                {viewModes[selectedPost.id] === 'raw' ? (
+                  <div className="text-sm text-[#333333] whitespace-pre-wrap font-mono bg-[#f9f9f9] p-6 rounded-xl border border-[#eeeeee]">
+                    {selectedPost.content}
+                  </div>
+                ) : (
+                  <div className="prose prose-slate prose-sm sm:prose-base max-w-none text-[#333333]">
+                    <Markdown
+                      components={{
+                        code(props) {
+                          const {children, className, node, ...rest} = props
+                          const match = /language-(\w+)/.exec(className || '')
+                          if (match && match[1] === 'mermaid') {
+                            return <Mermaid chart={String(children).replace(/\n$/, '')} />
+                          }
+                          return (
+                            <code {...rest} className={className}>
+                              {children}
+                            </code>
+                          )
                         }
-                        return (
-                          <code {...rest} className={className}>
-                            {children}
-                          </code>
-                        )
-                      }
-                    }}
-                  >
-                    {p.content}
-                  </Markdown>
-                </div>
-              )}
+                      }}
+                    >
+                      {selectedPost.content}
+                    </Markdown>
+                  </div>
+                )}
+              </div>
             </div>
-          ))
-        )}
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-[#999999] p-8 text-center">
+              <BookOpen className="opacity-20 mb-4" size={64} />
+              <p className="text-lg font-medium text-[#444] mb-1">No Post Selected</p>
+              <p className="text-sm">Select a post from the index on the left to view it here.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

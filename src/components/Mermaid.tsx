@@ -3,7 +3,10 @@ import mermaid from 'mermaid';
 
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'neutral',
+  theme: 'default',
+  themeVariables: {
+    background: '#ffffff',
+  },
   securityLevel: 'loose',
 });
 
