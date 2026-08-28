@@ -13,32 +13,32 @@ This document outlines the workflow and script for recording your 4-minute submi
 
 ### 1. Introduction (0:00 - 0:30)
 *   **Action:** Start on the **Dashboard** tab.
-*   **Voiceover:** "Welcome to Virtual Me (VME), an agentic developer workspace. VME is designed to act as your autonomous coding assistant, managing issues, tracking standups, and running background jobs. It uses a robust Multi-Agent architecture powered by Gemini to automate complex tasks while keeping you in control."
+*   **Voiceover:** "Welcome to Virtual Me (VME), an AI-powered personal developer workspace. VME is designed to act as your autonomous coding assistant, managing issues, tracking standups, and running background jobs. It uses a robust Multi-Agent architecture powered by Gemini to automate complex tasks while keeping you in complete control."
 
 ### 2. Context & Issues (0:30 - 1:00)
 *   **Action:** Click on the **Workspace (Issues)** tab. Show the current issues or create a quick mock issue (e.g., "Refactor database schema"). Click on the **Skills** tab briefly to show existing knowledge.
-*   **Voiceover:** "VME maintains long-term memory through Issues, Skills, and Blog posts. This provides our agents with the rich context they need to make intelligent decisions that align with our specific project."
+*   **Voiceover:** "Standard AI models have limited context windows. VME solves this by maintaining long-term memory through Issues, Skills, and persistent logs. This provides our agents with the rich, deep context they need to make intelligent decisions that align perfectly with our specific project's history."
 
 ### 3. Multi-Agent Orchestration: The Planner (1:00 - 2:00)
 *   **Action:** Go to the **Queue (qsub)** tab. Click the **"Demo: Orchestrate"** button.
-*   **Voiceover:** "Let's see the multi-agent system in action. I'm submitting an orchestration job to redesign our database schema. Instead of just blind execution, VME routes this to our **Planner Agent**. The Planner analyzes the request, fetches context from our workspace, and formulates a step-by-step execution plan."
+*   **Voiceover:** "Let's see the multi-agent system in action. I'm submitting an orchestration job to redesign our database schema. Instead of just blind execution, VME routes this to our **Planner Agent**. The Planner analyzes the request, fetches deep context from our workspace, and formulates a step-by-step execution plan."
 *   **Action:** Wait for the plan to stream in. Point out the `Awaiting Approval` status (yellow pulsing icon).
 *   **Voiceover:** "Notice that the job is now 'Awaiting Approval'. This is our **Human-in-the-Loop** safety mechanism. As developers, we review the agent's proposed plan before any destructive actions or complex code generation takes place."
 
 ### 4. Execution (2:00 - 2:45)
 *   **Action:** Click the green **"Approve"** button on the job.
-*   **Voiceover:** "Once I approve the plan, the job is handed off to the **Executor Agent**. The Executor takes the exact approved plan and begins generating the code and performing the necessary steps. You can see the logs streaming back in real-time as the agent works."
+*   **Voiceover:** "Once I approve the plan, the job is handed off to the **Executor Agent**. The Executor takes the exact approved plan and begins generating the code and performing the necessary steps. You can see the logs streaming back in real-time as the agent works autonomously."
 *   **Action:** Show the real-time logs updating in the UI.
 
 ### 5. Self-Improvement & Reflection (2:45 - 3:30)
 *   **Action:** Once the execution is complete, click the **"Run Self-Improvement"** button.
 *   **Voiceover:** "What makes VME truly agentic is its ability to learn. After a session of work, we can trigger the **Evaluator Agent**. The Evaluator reviews the execution logs of all recent jobs, identifies what went right or wrong, and extracts reusable knowledge."
 *   **Action:** Watch the Evaluator generate the JSON. Then navigate to the **Skills** tab.
-*   **Voiceover:** "The Evaluator automatically generates a new 'Skill' document based on its learnings and saves it to the database. Over time, VME builds a repository of auto-generated skills, improving the context for future planning and execution. Let's look at the new skill it just learned."
+*   **Voiceover:** "The Evaluator automatically generates a new 'Skill' document based on its learnings and saves it to the database. Over time, VME builds a repository of auto-generated skills, continuously improving the context for future planning and execution."
 
-### 6. Conclusion (3:30 - 4:00)
-*   **Action:** Switch back to the **Dashboard**.
-*   **Voiceover:** "In summary, Virtual Me leverages a Planner, Executor, and Evaluator agent to automate development workflows safely with Human-in-the-loop approval, and continuously improves itself through reflection. Thanks for watching!"
+### 6. Conclusion & Future Vision (3:30 - 4:00)
+*   **Action:** Switch to the **Blog & Lessons Learned** tab, explicitly highlighting the "Welcome Judges (4-min read)" post which contains the Vision section and Architecture diagram.
+*   **Voiceover:** "In summary, Virtual Me automates development safely and continuously improves itself. But our long-term vision is much bigger. Virtual Me is designed to become the global standard for 'Smart Context'—an integral extension to top-tier AI models. Using a 2 Million token window is expensive. Virtual Me cuts costs by dynamically routing only relevant history into a cheaper 200K 'hot token' window. And because 1 Million tokens is just 4 Megabytes of data, attaching a simple 10-Gigabyte database gives our model 2.5 Billion tokens of persistent memory. We aren't just scaling up 1000x—we are providing virtually unlimited, cost-effective smart context. Thank you for watching!"
 
 ---
 
