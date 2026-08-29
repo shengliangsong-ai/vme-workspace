@@ -24,7 +24,7 @@ We are primarily targeting **The Collaborative Partner** track, with strong unde
 *   **Cost-Efficient Scaling:** Deploys via **Cloud Run** with a single URL, automatically scaling to zero when not actively running background workflows.
 *   **Long-Running Persistent Workflows:** A background runner built on the ADK that executes long-running agentic workflows. It supports crash recovery, idempotency, and human-in-the-loop approval pauses before executing sensitive actions.
 *   **Digital Twin Memory Bank:** Integrated issue tracking, daily standups, and session reports stored in **Firestore**. Utilizes **Vector Search** and Managed Cloud Memory to semantically recall relevant past architectural decisions.
-*   **Self-Evolving Intelligence:** The agent actively analyzes its past execution logs (successes/failures) to autonomously self-improve, updating its own instructions and "Skills" over time.
+*   **Self-Evolving Intelligence (Personalized Fine-Tuning):** Virtual Me analyzes your daily activity and execution logs to build personalized skills and memories. Through continuous self-evaluation, the context gets smarter and better over time—effectively fine-tuning the model to each individual developer.
 *   **Open-Source Intelligence:** Powered by **Genkit** to create structured, AI-powered app features and maintain high code quality.
 
 ### 6. Tech Stack

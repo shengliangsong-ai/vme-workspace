@@ -12,7 +12,7 @@
 - **Session Resumption & Context Flow**: Auto-manage historical AI sessions. Resume a dormant task or project from a year ago seamlessly by rehydrating the exact context state to move it to the next stage.
 - **Virtual Teams Collaboration**: Instantiate multiple instances (e.g., Virtual Alice, Virtual Bob) that can merge and share context to form specialized "Virtual Teams" (like a firmware engineering team).
 - **Issue & Context Management**: Track bugs and feature requests. Build up the context (logs, code snippets, plans) for each issue sequentially.
-- **Skill Manager**: Save reusable prompts, rules, and system instructions (skills) to inject into your Claude or Gemini environment.
+- **Skill Manager & Personalized Fine-Tuning**: Virtual Me builds personalized skills daily based on your activity. Through continuous self-evaluation, your Virtual Me gets smarter and better over time—effectively fine-tuning the AI to you as an individual.
 - **GitHub Synchronization**: Push and pull your entire context state to your personal GitHub repository, allowing you to resume work across different devices or long periods of time.
 - **Token Estimation**: Keep track of your context size to stay within the 1M token limit.
 - **Agentic Workflows**: Multi-agent orchestration via SSE stream including Planner, Executor, and QA agents.
@@ -46,11 +46,11 @@ If you'd like to follow along with our submission video, here is the script and 
 *   **Voiceover:** "Once I approve the plan, the job is handed off to the **Executor Agent**. The Executor takes the exact approved plan and begins generating the code and performing the necessary steps. You can see the logs streaming back in real-time as the agent works autonomously."
 *   **Action:** Show the real-time logs updating in the UI.
 
-### 5. Self-Improvement & Reflection (2:45 - 3:30)
+### 5. Self-Improvement & Personalized Skills (2:45 - 3:30)
 *   **Action:** Once the execution is complete, click the **"Run Self-Improvement"** button.
-*   **Voiceover:** "What makes VME truly agentic is its ability to learn. After a session of work, we can trigger the **Evaluator Agent**. The Evaluator reviews the execution logs of all recent jobs, identifies what went right or wrong, and extracts reusable knowledge."
+*   **Voiceover:** "What makes VME truly agentic is its ability to learn and fine-tune itself to you as an individual. Every day, the Evaluator Agent reviews your daily activity and execution logs, identifies what went right or wrong, and builds personalized skills."
 *   **Action:** Watch the Evaluator generate the JSON. Then navigate to the **Skills** tab.
-*   **Voiceover:** "The Evaluator automatically generates a new 'Skill' document based on its learnings and saves it to the database. Over time, VME builds a repository of auto-generated skills, continuously improving the context for future planning and execution."
+*   **Voiceover:** "The Evaluator automatically saves these learned skills and memories to the database. Through this continuous self-evaluation, your Virtual Me gets smarter and better over time—creating a highly personalized, fine-tuned context for future execution."
 
 ### 6. Conclusion & Future Vision (3:30 - 4:00)
 *   **Action:** Switch to the **Blog & Lessons Learned** tab, explicitly highlighting the "Welcome Judges (4-min read)" post which contains the Vision section and Architecture diagram.

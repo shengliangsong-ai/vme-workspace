@@ -30,11 +30,11 @@ This document outlines the workflow and script for recording your 4-minute submi
 *   **Voiceover:** "Once I approve the plan, the job is handed off to the **Executor Agent**. The Executor takes the exact approved plan and begins generating the code and performing the necessary steps. You can see the logs streaming back in real-time as the agent works autonomously."
 *   **Action:** Show the real-time logs updating in the UI.
 
-### 5. Self-Improvement & Reflection (2:45 - 3:30)
+### 5. Self-Improvement & Personalized Skills (2:45 - 3:30)
 *   **Action:** Once the execution is complete, click the **"Run Self-Improvement"** button.
-*   **Voiceover:** "What makes VME truly agentic is its ability to learn. After a session of work, we can trigger the **Evaluator Agent**. The Evaluator reviews the execution logs of all recent jobs, identifies what went right or wrong, and extracts reusable knowledge."
+*   **Voiceover:** "What makes VME truly agentic is its ability to learn and fine-tune itself to you as an individual. Every day, the Evaluator Agent reviews your daily activity and execution logs, identifies what went right or wrong, and builds personalized skills."
 *   **Action:** Watch the Evaluator generate the JSON. Then navigate to the **Skills** tab.
-*   **Voiceover:** "The Evaluator automatically generates a new 'Skill' document based on its learnings and saves it to the database. Over time, VME builds a repository of auto-generated skills, continuously improving the context for future planning and execution."
+*   **Voiceover:** "The Evaluator automatically saves these learned skills and memories to the database. Through this continuous self-evaluation, your Virtual Me gets smarter and better over time—creating a highly personalized, fine-tuned context for future execution."
 
 ### 6. Conclusion & Future Vision (3:30 - 4:00)
 *   **Action:** Switch to the **Blog & Lessons Learned** tab, explicitly highlighting the "Welcome Judges (4-min read)" post which contains the Vision section and Architecture diagram.
