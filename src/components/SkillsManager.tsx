@@ -39,7 +39,7 @@ export function SkillsManager() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-semibold text-[#1a1a1a]">Skills & Global Context</h2>
-          <p className="text-[#666666] mt-1">Manage reusable prompts, rules, and memory injected into Claude.</p>
+          <p className="text-[#666666] mt-1">Manage reusable prompts, rules, and memory injected into agents.</p>
         </div>
         <button
           onClick={handleStartCreate}
@@ -196,7 +196,7 @@ export function SkillsManager() {
         ))}
         {skills.length === 0 && !isCreating && (
           <div className="col-span-2 text-center py-12 bg-white rounded-xl border border-[#eeeeee] border-dashed">
-            <p className="text-[#888888]">No skills defined yet. Add a skill to store your Claude rules and prompts.</p>
+            <p className="text-[#888888]">No skills defined yet. Add a skill to store your AI rules and prompts.</p>
           </div>
         )}
       </div>

@@ -12,7 +12,7 @@ Modern software development and problem-solving frequently demand the management
 ### 1.1. The Memory Bridge: Human vs. AI
 A core philosophical pillar of Virtual Me is mapping human cognition to AI capabilities:
 * **Human Memory:** Humans utilize Short-Term Memory (STM) for active problem-solving and Long-Term Memory (LTM) for accumulated experiences and rules.
-* **AI Memory:** Large Language Models (like Claude or Gemini) utilize a Context Window (analogous to STM) for active token processing, and dynamically loaded Skills/System Prompts (analogous to LTM) at runtime.
+* **AI Memory:** Large Language Models (like Gemini or Anthropic) utilize a Context Window (analogous to STM) for active token processing, and dynamically loaded Skills/System Prompts (analogous to LTM) at runtime.
 
 **Virtual Me acts as the bridge.** It optimizes and curates the exact context needed for daily tasks in a new AI session. Instead of overwhelming the AI with irrelevant data, Virtual Me dynamically rehydrates the AI's "short-term memory" from the human's "long-term memory" (stored in Firestore), creating a perfectly synchronized context flow.
 

@@ -19,7 +19,7 @@
 - **Clean Minimalism UI**: A focused, distraction-free interface built with React and Tailwind CSS.
 
 ## The Future Vision: A Standard for Smart Context
-In the long term, Virtual Me aims to be an integral architectural feature of any top-tier AI model (Gemini, ChatGPT, Claude) and a standard extension across AI infrastructure companies. While the foundational AI model acts as the "brain" with a strictly limited context window (e.g., 1M or 2M tokens), utilizing maximum context windows is highly expensive. 
+In the long term, Virtual Me aims to be an integral architectural feature of any top-tier AI model (like Gemini, OpenAI, or Anthropic) and a standard extension across AI infrastructure companies. While the foundational AI model acts as the "brain" with a strictly limited context window (e.g., 1M or 2M tokens), utilizing maximum context windows is highly expensive. 
 
 Virtual Me dynamically manages this memory, drastically cutting costs by feeding only the necessary, relevant information into a cheaper **200K "hot token" window** per task. Furthermore, Virtual Me provides effectively **unlimited context scaling**. To put this in perspective: 1 Million tokens uses approximately 4MB of data. By attaching just **10GB of cloud storage**, Virtual Me equips the AI with **2.5 Billion tokens** of persistent memory—seamlessly bridging the gap between finite, expensive token windows and limitless human memory.
 

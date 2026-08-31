@@ -23,11 +23,11 @@ export function DebugPanel() {
           </div>
           <div className="flex items-center gap-2">
             <Bot size={14} className="text-purple-400" />
-            <span>AI Prompts: {state.debugEvents?.filter((e: any) => e.type === 'ai_prompt').length || 0}</span>
+            <span>AI Prompts: {(state.debugEvents || []).filter((e: any) => e.type === 'ai_prompt').length}</span>
           </div>
           <div className="flex items-center gap-2">
             <Terminal size={14} className="text-green-400" />
-            <span>CLI Cmds: {state.debugEvents?.filter((e: any) => e.type === 'cli').length || 0}</span>
+            <span>CLI Cmds: {(state.debugEvents || []).filter((e: any) => e.type === 'cli').length}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 text-[#666]">

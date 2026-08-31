@@ -4,34 +4,10 @@ import { createServer as createViteServer } from "vite";
 import fs from "fs";
 import crypto from "crypto";
 
-// Mock Firebase implementation for local storage
-const LOCAL_DB_PATH = path.join(process.cwd(), '.local-db.json');
-function initializeApp(config: any) { return {}; }
-function getFirestore(app: any, dbId: string) { return "mock-db"; }
-function doc(db: any, collection: string, id: string) {
-  return { collection, id };
-}
-async function getDoc(docRef: any) {
-  if (!fs.existsSync(LOCAL_DB_PATH)) return { exists: () => false, data: () => undefined };
-  try {
-    const dbData = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    const key = `${docRef.collection}/${docRef.id}`;
-    if (dbData[key]) return { exists: () => true, data: () => dbData[key] };
-  } catch (e) {}
-  return { exists: () => false, data: () => undefined };
-}
-async function setDoc(docRef: any, data: any) {
-  let dbData: any = {};
-  if (fs.existsSync(LOCAL_DB_PATH)) {
-    try {
-      dbData = JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf-8'));
-    } catch (e) {}
-  }
-  const key = `${docRef.collection}/${docRef.id}`;
-  dbData[key] = data;
-  fs.writeFileSync(LOCAL_DB_PATH, JSON.stringify(dbData, null, 2), 'utf-8');
-}
-function collection(db: any, path: string) { return path; }
+// Real Firebase implementation
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestore';
+
 
 import { genkit, z } from "genkit";
 import { googleAI, textEmbedding004 } from "@genkit-ai/googleai";
@@ -112,7 +88,7 @@ async function ensureAgents() {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   if (genai) {
     ensureAgents();

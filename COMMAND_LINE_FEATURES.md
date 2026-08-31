@@ -43,7 +43,7 @@ The terminal supports managing all features in the website:
 
 ### Settings
 - \`config ls\`: Views the current configurations.
-- \`config set <key> "<value>"\`: Sets a configuration value. (e.g. \`githubToken\`, \`githubRepo\`, \`claudeApiKey\`)
+- \`config set <key> "<value>"\`: Sets a configuration value. (e.g. \`githubToken\`, \`githubRepo\`, \`primaryApiKey\`)
 
 ### General
 - \`help\`: Displays the help menu.

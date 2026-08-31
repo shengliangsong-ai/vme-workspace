@@ -86,7 +86,7 @@ export function SettingsView() {
           
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-[#999999] mb-2">
-              Claude API Key (Anthropic)
+              Primary AI API Key
             </label>
             <input
               type="password"

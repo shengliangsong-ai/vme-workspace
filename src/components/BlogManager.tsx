@@ -106,7 +106,7 @@ export function BlogManager() {
     setForm({
       title: post.title,
       content: post.content,
-      labels: post.labels.join(', ')
+      labels: (post.labels || []).join(', ')
     });
     setEditingId(post.id);
     setIsCreating(false);
@@ -130,7 +130,7 @@ export function BlogManager() {
       .filter(p => 
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
         p.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.labels.some(l => l.toLowerCase().includes(searchQuery.toLowerCase()))
+        (p.labels || []).some(l => l.toLowerCase().includes(searchQuery.toLowerCase()))
       )
       .sort((a, b) => b.createdAt - a.createdAt);
   }, [blogPosts, searchQuery]);
@@ -151,7 +151,7 @@ export function BlogManager() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-semibold text-[#1a1a1a]">Blog & Lessons Learned</h2>
-          <p className="text-[#666666] mt-1">Document insights from Claude sessions.</p>
+          <p className="text-[#666666] mt-1">Document insights from AI sessions.</p>
         </div>
         {!isCreating && !editingId && (
           <button
@@ -201,9 +201,9 @@ export function BlogManager() {
                       <p className={`text-xs ${selectedPostId === p.id ? 'text-blue-600' : 'text-[#888888]'} truncate`}>
                         {new Date(p.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
-                      {p.labels.length > 0 && (
+                      {(p.labels || []).length > 0 && (
                         <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${selectedPostId === p.id ? 'bg-blue-100 text-blue-700' : 'bg-[#e0e0e0] text-[#666]'}`}>
-                          {p.labels.length} tag{p.labels.length !== 1 ? 's' : ''}
+                          {(p.labels || []).length} tag{(p.labels || []).length !== 1 ? 's' : ''}
                         </span>
                       )}
                     </div>
@@ -269,9 +269,9 @@ export function BlogManager() {
                     <h3 className="font-bold text-3xl text-[#1a1a1a] mb-3">{selectedPost.title}</h3>
                     <div className="flex items-center gap-4 text-sm text-[#888888]">
                       <span>{new Date(selectedPost.createdAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })}</span>
-                      {selectedPost.labels.length > 0 && (
+                      {(selectedPost.labels || []).length > 0 && (
                         <div className="flex gap-2">
-                          {selectedPost.labels.map((l, i) => (
+                          {(selectedPost.labels || []).map((l, i) => (
                             <span key={i} className="flex items-center gap-1 bg-[#f0f0f0] px-2 py-0.5 rounded-md text-[#666] text-xs font-medium">
                               <Tag size={12} /> {l}
                             </span>

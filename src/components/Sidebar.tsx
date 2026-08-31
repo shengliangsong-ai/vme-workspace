@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../lib/utils';
-import { Users, LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo, Calendar, BookOpen, Terminal, PlayCircle } from 'lucide-react';
+import { Users, LayoutDashboard, CheckSquare, BrainCircuit, Settings, Github, RefreshCw, ListTodo, Calendar, BookOpen, Terminal, PlayCircle, ExternalLink, Code } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 interface SidebarProps {
@@ -31,7 +31,7 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
         </div>
         <div>
           <h1 className="text-sm font-semibold text-[#1a1a1a] leading-tight">Virtual Me</h1>
-          <p className="text-xs text-[#888888]">Claude Workflow</p>
+          <p className="text-xs text-[#888888]">Agent Orchestrator</p>
         </div>
       </div>
 
@@ -58,6 +58,24 @@ export function Sidebar({ currentTab, setCurrentTab }: SidebarProps) {
       </nav>
 
       <div className="p-4 border-t border-[#eeeeee] flex flex-col gap-3">
+
+        <a
+          href="https://github.com/shengliangsong-ai/vme-workspace"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#24292e] hover:bg-[#2f363d] rounded-full text-xs font-semibold transition-colors text-white shadow-sm"
+        >
+          <Github size={14} /> View GitHub Source
+        </a>
+        <a
+          href="https://github.dev/shengliangsong-ai/vme-workspace"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#f0f0f0] hover:bg-[#e5e5e5] rounded-full text-xs font-semibold transition-colors text-[#1a1a1a]"
+        >
+          <Code size={14} /> Read Source Code
+        </a>
+
         <button 
           onClick={() => window.dispatchEvent(new CustomEvent('toggle-terminal'))}
           className="text-xs text-center text-[#999999] hover:text-[#1a1a1a] mb-1 flex items-center justify-center gap-1 transition-colors"

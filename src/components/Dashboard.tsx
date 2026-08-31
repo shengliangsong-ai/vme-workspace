@@ -125,7 +125,7 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
                   </div>
                   <div className="flex items-center gap-3 text-xs text-[#888888]">
                     <span className="flex items-center gap-1"><Clock size={12}/> {new Date(issue.updatedAt).toLocaleDateString()}</span>
-                    <span>{issue.steps.filter(s => s.isCompleted).length} / {issue.steps.length} steps</span>
+                    <span>{(issue.steps || []).filter(s => s.isCompleted).length} / {(issue.steps || []).length} steps</span>
                   </div>
                 </div>
                 
@@ -161,12 +161,12 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
                <div>
                  <div className="flex justify-between text-[11px] mb-2">
                    <span className="font-medium text-[#1a1a1a]">Workflow Progress</span>
-                   <span className="text-[#666666]">{activeIssue.steps.filter(s => s.isCompleted).length} / {activeIssue.steps.length}</span>
+                   <span className="text-[#666666]">{(activeIssue.steps || []).filter(s => s.isCompleted).length} / {(activeIssue.steps || []).length}</span>
                  </div>
                  <div className="h-2 w-full bg-[#f0f0f0] rounded-full overflow-hidden">
                    <div 
                     className="h-full bg-blue-600" 
-                    style={{width: `${(activeIssue.steps.filter(s => s.isCompleted).length / activeIssue.steps.length) * 100}%`}}
+                    style={{width: `${((activeIssue.steps || []).filter(s => s.isCompleted).length / Math.max((activeIssue.steps || []).length, 1)) * 100}%`}}
                    ></div>
                  </div>
                </div>
@@ -211,7 +211,7 @@ export function Dashboard({ setCurrentTab }: DashboardProps) {
               <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-[#1a1a1a]">Active Jobs</span>
                   <span className="text-[10px] px-2 py-1 bg-[#f0f0f0] text-[#1a1a1a] rounded font-semibold">
-                    {useAppContext().jobs.filter(j => j.status === 'running' || j.status === 'queued').length} pending
+                    {(useAppContext().jobs || []).filter(j => j.status === 'running' || j.status === 'queued').length} pending
                   </span>
               </div>
            </div>

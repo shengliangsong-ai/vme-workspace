@@ -37,7 +37,7 @@ export function Workspace() {
             </span>
             <h2 className="text-2xl font-semibold text-[#1a1a1a]">{activeIssue.title}</h2>
           </div>
-          <p className="text-[#666666] text-sm">Work through the steps below to capture Claude's context and execute the fix.</p>
+          <p className="text-[#666666] text-sm">Work through the steps below to capture the agent's context and execute the fix.</p>
         </div>
         <div className="text-right">
           <div className="text-[11px] uppercase tracking-widest text-[#999999] font-bold mb-1">Context Load</div>
@@ -98,7 +98,7 @@ export function Workspace() {
                   <textarea
                     value={step.content}
                     onChange={(e) => updateStepContent(activeIssue.id, step.id, e.target.value)}
-                    placeholder={`Paste context, logs, or Claude's responses for: ${step.title}...`}
+                    placeholder={`Paste context, logs, or agent responses for: ${step.title}...`}
                     className="w-full h-48 bg-[#f9f9f9] border border-[#eeeeee] rounded-lg p-3 text-sm text-[#1a1a1a] font-mono focus:outline-none focus:border-[#ccc] resize-y"
                   />
                 </div>
