@@ -106,6 +106,7 @@ export function CommandTerminal({ currentTab, setCurrentTab }: { currentTab: str
   standup [ls|add|rm]
   blog [ls|add|rm]
   config [ls|set]
+  vme run <command> - Execute a workflow and monitor in Job Queue
   clear
 Type "help <command>" for more details.`, 'system');
         break;
@@ -138,8 +139,27 @@ Type "help <command>" for more details.`, 'system');
       case 'config':
         handleConfigCommand(args);
         break;
+      case 'vme':
+        handleVmeCommand(args);
+        break;
       default:
         print(`Command not found: ${cmd}. Type "help" for a list of commands.`, 'error');
+    }
+  };
+
+  
+  const handleVmeCommand = (args: string[]) => {
+    if (args[0] === 'run') {
+      const commandString = args.slice(1).join(' ');
+      if (!commandString) {
+        print('Usage: vme run <command>', 'error');
+        return;
+      }
+      submitJob(commandString, 120000);
+      print(`[VME] Orchestrator spawned background job for: ${commandString}`, 'success');
+      setCurrentTab('queue'); // Auto navigate to queue!
+    } else {
+      print('Usage: vme run <command>', 'error');
     }
   };
 

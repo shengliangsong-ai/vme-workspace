@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+const fs = require('fs');
+
+let code = `import React, { useState } from 'react';
 import { Play, Activity, Trash2, ArrowUp, ArrowDown, X, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
@@ -120,7 +122,7 @@ export function QueueManager() {
                         exit={{ opacity: 0, scale: 0.95 }}
                         key={job.id}
                         onClick={() => setSelectedJobId(job.id)}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors flex items-center gap-4 ${selectedJobId === job.id ? 'border-blue-500 bg-blue-50' : 'border-[#eeeeee] hover:bg-[#f9f9f9]'}`}
+                        className={\`p-3 rounded-lg border cursor-pointer transition-colors flex items-center gap-4 \${selectedJobId === job.id ? 'border-blue-500 bg-blue-50' : 'border-[#eeeeee] hover:bg-[#f9f9f9]'}\`}
                       >
                         <div className="flex items-center justify-center w-6 h-6">
                           {getStatusIcon(job.status)}
@@ -129,8 +131,8 @@ export function QueueManager() {
                           <div className="font-mono text-sm text-[#1a1a1a] truncate">{job.command}</div>
                           <div className="text-xs text-[#999999] mt-1">
                             Timeout: {job.timeoutMs}ms | Status: {job.status}
-                            {job.startedAt && ` | Started: ${new Date(job.startedAt).toLocaleTimeString()}`}
-                            {job.completedAt && ` | Finished: ${new Date(job.completedAt).toLocaleTimeString()}`}
+                            {job.startedAt && \` | Started: \${new Date(job.startedAt).toLocaleTimeString()}\`}
+                            {job.completedAt && \` | Finished: \${new Date(job.completedAt).toLocaleTimeString()}\`}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 hover:opacity-100 transition-opacity">
@@ -227,3 +229,5 @@ export function QueueManager() {
     </div>
   );
 }
+`;
+fs.writeFileSync('src/components/QueueManager.tsx', code);

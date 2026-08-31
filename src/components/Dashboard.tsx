@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+
 import { useAppContext } from '../context/AppContext';
 import { estimateTokens, formatTokenCount, cn } from '../lib/utils';
 import { Plus, Clock, Play } from 'lucide-react';
@@ -6,6 +8,22 @@ import { Plus, Clock, Play } from 'lucide-react';
 interface DashboardProps {
   setCurrentTab: (tab: string) => void;
 }
+
+
+const tokenData = [
+  { time: '10:00', tokens: 1200 },
+  { time: '11:00', tokens: 3500 },
+  { time: '12:00', tokens: 2800 },
+  { time: '13:00', tokens: 8400 },
+  { time: '14:00', tokens: 5100 },
+  { time: '15:00', tokens: 10200 },
+  { time: '16:00', tokens: 7500 },
+];
+const jobData = [
+  { name: 'Success', value: 45, color: '#22c55e' },
+  { name: 'Failed', value: 3, color: '#ef4444' },
+  { name: 'Cancelled', value: 12, color: '#94a3b8' }
+];
 
 export function Dashboard({ setCurrentTab }: DashboardProps) {
   const { issues, activeIssueId, createIssue, setActiveIssue, skills } = useAppContext();

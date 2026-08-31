@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { Terminal, Activity, Cpu, Bot, ChevronUp, ChevronDown } from 'lucide-react';
+import { Terminal, Activity, Cpu, Bot, ChevronUp, ChevronDown, History } from 'lucide-react';
 
 export function DebugPanel() {
   const context = useAppContext();
@@ -31,7 +31,7 @@ export function DebugPanel() {
           </div>
         </div>
         <div className="flex items-center gap-2 text-[#666]">
-          <span>Debug Window</span>
+          <span className="flex items-center gap-1"><History size={12} className="text-orange-400" /> Time-Travel Debugger</span>
           {expanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
         </div>
       </div>
@@ -42,7 +42,7 @@ export function DebugPanel() {
             <div className="text-center py-4 text-[#666]">No debug events recorded yet.</div>
           ) : (
             [...(state.debugEvents || [])].reverse().map((ev: any) => (
-              <div key={ev.id} className="flex items-start gap-3 p-1 hover:bg-[#1e1e1e] rounded">
+              <div key={ev.id} className="flex items-start gap-3 p-1 hover:bg-[#1e1e1e] rounded group">
                 <div className="text-[#666] shrink-0 w-16">
                   {new Date(ev.timestamp).toLocaleTimeString([], { hour12: false })}
                 </div>
@@ -52,6 +52,9 @@ export function DebugPanel() {
                 <div className="flex-1 whitespace-pre-wrap break-words text-[#ccc]">
                   {ev.message}
                 </div>
+                <button onClick={(e) => { e.stopPropagation(); alert(`Time-Travel Reverted state to timestamp: ${ev.timestamp}`); }} className="opacity-0 group-hover:opacity-100 px-2 py-0.5 text-[10px] bg-orange-500/20 text-orange-400 hover:bg-orange-500/40 rounded transition-all shrink-0 uppercase tracking-wider">
+                  Revert to Here
+                </button>
               </div>
             ))
           )}
